@@ -1,3 +1,4 @@
+C:\BC\project\novel-system\src\main\java\com\novel\exception\BusinessException.java
 C:\BC\project\novel-system\src\main\java\com\novel\service\ReadingService.java
 C:\BC\project\novel-system\src\main\java\com\novel\repository\TopicRepository.java
 C:\BC\project\novel-system\src\main\java\com\novel\repository\CommentLikeRepository.java
@@ -54,6 +55,7 @@ C:\BC\project\novel-system\src\main\java\com\novel\controller\NovelController.ja
 C:\BC\project\novel-system\src\main\java\com\novel\controller\SearchController.java
 C:\BC\project\novel-system\src\main\java\com\novel\dto\ChapterDTO.java
 C:\BC\project\novel-system\src\main\java\com\novel\repository\NovelLikeRepository.java
+C:\BC\project\novel-system\src\main\java\com\novel\exception\ResourceNotFoundException.java
 C:\BC\project\novel-system\src\main\java\com\novel\model\Category.java
 C:\BC\project\novel-system\src\main\java\com\novel\util\JwtAuthenticationFilter.java
 C:\BC\project\novel-system\src\main\java\com\novel\service\RedisCacheService.java
