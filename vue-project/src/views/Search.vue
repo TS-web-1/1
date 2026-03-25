@@ -1,7 +1,7 @@
 <script setup>
 /**
  * Search.vue - 小说搜索页面组件
- * 
+ *
  * 该组件实现了小说搜索功能，包括：
  * - 关键词搜索
  * - 高级筛选（分类、作者、字数、状态等）
@@ -79,7 +79,7 @@ const getSuggestions = async () => {
     showSuggestions.value = false
     return
   }
-  
+
   try {
     const response = await searchApi.getSearchSuggestions(searchQuery.value)
     if (response.code === 200) {
@@ -92,14 +92,14 @@ const getSuggestions = async () => {
 }
 
 // 选择搜索建议
-const selectSuggestion = (suggestion) => {
+const selectSuggestion = suggestion => {
   searchQuery.value = suggestion
   showSuggestions.value = false
   handleSearch()
 }
 
 // 选择热门关键词
-const selectHotKeyword = (keyword) => {
+const selectHotKeyword = keyword => {
   searchQuery.value = keyword
   handleSearch()
 }
@@ -110,15 +110,15 @@ const handleSearch = async (page = 0) => {
     ElMessage.warning('请输入搜索关键词或选择筛选条件')
     return
   }
-  
+
   // 更新URL参数
   const query = { q: searchQuery.value }
   if (filters.value.category) query.category = filters.value.category
   router.push({ query })
-  
+
   loading.value = true
   showSuggestions.value = false
-  
+
   try {
     const params = {
       keyword: searchQuery.value || undefined,
@@ -131,7 +131,7 @@ const handleSearch = async (page = 0) => {
       page,
       size: pagination.value.size
     }
-    
+
     const response = await searchApi.advancedSearch(params)
     if (response.code === 200) {
       const data = response.data
@@ -142,7 +142,7 @@ const handleSearch = async (page = 0) => {
         totalElements: data.totalElements,
         size: data.size
       }
-      
+
       if (searchResults.value.length === 0) {
         ElMessage.info('没有找到相关小说')
       }
@@ -176,12 +176,15 @@ const toggleFilters = () => {
 }
 
 // 监听URL参数变化
-watch(() => route.query.q, (newQuery) => {
-  if (newQuery) {
-    searchQuery.value = newQuery
-    handleSearch()
+watch(
+  () => route.query.q,
+  newQuery => {
+    if (newQuery) {
+      searchQuery.value = newQuery
+      handleSearch()
+    }
   }
-})
+)
 
 // 监听搜索框输入
 watch(searchQuery, () => {
@@ -206,23 +209,23 @@ onMounted(() => {
       <h1>搜索小说</h1>
       <div class="search-box-container">
         <div class="search-box">
-          <input 
-            type="text" 
-            v-model="searchQuery" 
+          <input
+            v-model="searchQuery"
+            type="text"
             placeholder="搜索小说名称、作者或关键词"
             @keyup.enter="handleSearch()"
             @focus="showSuggestions = suggestions.length > 0"
-            @blur="setTimeout(() => showSuggestions = false, 200)"
+            @blur="setTimeout(() => (showSuggestions = false), 200)"
           />
-          <button @click="handleSearch()" :disabled="loading">
+          <button :disabled="loading" @click="handleSearch()">
             {{ loading ? '搜索中...' : '搜索' }}
           </button>
         </div>
-        
+
         <!-- 搜索建议 -->
         <div v-if="showSuggestions" class="suggestions-dropdown">
-          <div 
-            v-for="suggestion in suggestions" 
+          <div
+            v-for="suggestion in suggestions"
             :key="suggestion"
             class="suggestion-item"
             @click="selectSuggestion(suggestion)"
@@ -231,12 +234,12 @@ onMounted(() => {
           </div>
         </div>
       </div>
-      
+
       <!-- 热门搜索 -->
       <div v-if="hotKeywords.length > 0 && !searchQuery" class="hot-keywords">
         <span class="hot-label">热门搜索：</span>
-        <span 
-          v-for="keyword in hotKeywords.slice(0, 8)" 
+        <span
+          v-for="keyword in hotKeywords.slice(0, 8)"
           :key="keyword"
           class="hot-keyword"
           @click="selectHotKeyword(keyword)"
@@ -245,15 +248,15 @@ onMounted(() => {
         </span>
       </div>
     </div>
-    
+
     <!-- 筛选按钮 -->
     <div class="filter-toggle">
-      <button @click="toggleFilters" class="toggle-btn">
+      <button class="toggle-btn" @click="toggleFilters">
         <span>{{ showFilters ? '隐藏筛选' : '高级筛选' }}</span>
         <span class="toggle-icon">{{ showFilters ? '▲' : '▼' }}</span>
       </button>
     </div>
-    
+
     <!-- 筛选面板 -->
     <div v-show="showFilters" class="filters-panel">
       <div class="filter-row">
@@ -266,12 +269,12 @@ onMounted(() => {
             </option>
           </select>
         </div>
-        
+
         <div class="filter-item">
           <label>作者：</label>
-          <input type="text" v-model="filters.author" placeholder="作者名称" />
+          <input v-model="filters.author" type="text" placeholder="作者名称" />
         </div>
-        
+
         <div class="filter-item">
           <label>状态：</label>
           <select v-model="filters.status">
@@ -281,26 +284,26 @@ onMounted(() => {
           </select>
         </div>
       </div>
-      
+
       <div class="filter-row">
         <div class="filter-item">
           <label>字数范围：</label>
-          <input 
-            type="number" 
-            v-model.number="filters.minWordCount" 
+          <input
+            v-model.number="filters.minWordCount"
+            type="number"
             placeholder="最小字数"
             class="word-count-input"
           />
           <span class="separator">至</span>
-          <input 
-            type="number" 
-            v-model.number="filters.maxWordCount" 
+          <input
+            v-model.number="filters.maxWordCount"
+            type="number"
             placeholder="最大字数"
             class="word-count-input"
           />
           <span class="word-unit">字</span>
         </div>
-        
+
         <div class="filter-item">
           <label>排序方式：</label>
           <select v-model="filters.sortBy">
@@ -311,13 +314,13 @@ onMounted(() => {
           </select>
         </div>
       </div>
-      
+
       <div class="filter-actions">
-        <button @click="handleSearch()" class="apply-btn">应用筛选</button>
-        <button @click="resetFilters" class="reset-btn">重置</button>
+        <button class="apply-btn" @click="handleSearch()">应用筛选</button>
+        <button class="reset-btn" @click="resetFilters">重置</button>
       </div>
     </div>
-    
+
     <!-- 搜索结果 -->
     <div class="search-results">
       <div v-if="searchQuery || filters.category" class="results-header">
@@ -326,7 +329,7 @@ onMounted(() => {
           找到 {{ pagination.totalElements }} 本小说
         </span>
       </div>
-      
+
       <div v-if="loading" class="loading-state">
         <p>搜索中...</p>
       </div>
@@ -334,23 +337,23 @@ onMounted(() => {
         <div class="novel-list">
           <NovelCard v-for="novel in searchResults" :key="novel.id" :novel="novel" />
         </div>
-        
+
         <!-- 分页 -->
         <div v-if="pagination.totalPages > 1" class="pagination">
-          <button 
-            @click="handleSearch(pagination.currentPage - 1)"
+          <button
             :disabled="pagination.currentPage === 0"
             class="page-btn"
+            @click="handleSearch(pagination.currentPage - 1)"
           >
             上一页
           </button>
           <span class="page-info">
             {{ pagination.currentPage + 1 }} / {{ pagination.totalPages }}
           </span>
-          <button 
-            @click="handleSearch(pagination.currentPage + 1)"
+          <button
             :disabled="pagination.currentPage >= pagination.totalPages - 1"
             class="page-btn"
+            @click="handleSearch(pagination.currentPage + 1)"
           >
             下一页
           </button>
@@ -408,7 +411,12 @@ onMounted(() => {
   left: 0;
   width: 100%;
   height: 4px;
-  background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-accent) 50%, var(--color-primary) 100%);
+  background: linear-gradient(
+    90deg,
+    var(--color-primary) 0%,
+    var(--color-accent) 50%,
+    var(--color-primary) 100%
+  );
 }
 
 .search-header h1 {
@@ -627,7 +635,7 @@ onMounted(() => {
 }
 
 .filter-item select,
-.filter-item input[type="text"] {
+.filter-item input[type='text'] {
   flex: 1;
   padding: var(--spacing-sm) var(--spacing-md);
   border: 1px solid var(--color-border);
@@ -639,7 +647,7 @@ onMounted(() => {
 }
 
 .filter-item select:focus,
-.filter-item input[type="text"]:focus {
+.filter-item input[type='text']:focus {
   border-color: var(--color-accent);
   outline: none;
   box-shadow: 0 0 0 3px rgba(214, 158, 46, 0.1);
@@ -784,7 +792,8 @@ onMounted(() => {
   padding: 0 var(--spacing-md);
 }
 
-.empty-state, .loading-state {
+.empty-state,
+.loading-state {
   text-align: center;
   padding: var(--spacing-2xl);
   color: var(--color-text-tertiary);
@@ -821,11 +830,11 @@ onMounted(() => {
   .search {
     padding: var(--spacing-md);
   }
-  
+
   .search-header h1 {
     font-size: 28px;
   }
-  
+
   .novel-list {
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   }
@@ -835,35 +844,35 @@ onMounted(() => {
   .search {
     padding: var(--spacing-sm);
   }
-  
+
   .search-header {
     padding: var(--spacing-xl) var(--spacing-md);
   }
-  
+
   .search-header h1 {
     font-size: 24px;
   }
-  
+
   .novel-list {
     grid-template-columns: 1fr;
   }
-  
+
   .filter-row {
     flex-direction: column;
   }
-  
+
   .filter-item {
     min-width: 100%;
   }
-  
+
   .search-box-container {
     max-width: 100%;
   }
-  
+
   .search-box {
     flex-direction: column;
   }
-  
+
   .search-box button {
     padding: var(--spacing-md);
     width: 100%;

@@ -16,8 +16,8 @@ export const getTrendingGenres = () => {
 }
 
 // 获取待审核小说列表
-export const getNovels = (params) => {
-  return request.get('/admin/novels/pending', { 
+export const getNovels = params => {
+  return request.get('/admin/novels/pending', {
     params: {
       page: params.page || 0,
       size: params.size || 20,
@@ -27,8 +27,8 @@ export const getNovels = (params) => {
 }
 
 // 获取所有小说列表（管理用）
-export const getAllNovels = (params) => {
-  return request.get('/admin/novels', { 
+export const getAllNovels = params => {
+  return request.get('/admin/novels', {
     params: {
       page: params.page || 0,
       size: params.size || 20,
@@ -38,17 +38,17 @@ export const getAllNovels = (params) => {
 }
 
 // 封禁小说
-export const banNovel = (novelId) => {
+export const banNovel = novelId => {
   return request.post(`/admin/novels/${novelId}/ban`)
 }
 
 // 解封小说
-export const unbanNovel = (novelId) => {
+export const unbanNovel = novelId => {
   return request.post(`/admin/novels/${novelId}/unban`)
 }
 
 // 删除小说
-export const deleteNovel = (novelId) => {
+export const deleteNovel = novelId => {
   return request.delete(`/admin/novels/${novelId}`)
 }
 
@@ -62,12 +62,14 @@ export const updateNovelStatus = (novelId, status, reviewStatus) => {
 
 // 审核小说
 export const reviewNovel = (novelId, status, reviewComment) => {
-  return request.post(`/admin/novels/${novelId}/review?status=${encodeURIComponent(status)}&reviewComment=${encodeURIComponent(reviewComment || '')}`)
+  return request.post(
+    `/admin/novels/${novelId}/review?status=${encodeURIComponent(status)}&reviewComment=${encodeURIComponent(reviewComment || '')}`
+  )
 }
 
 // 获取待审核章节列表
-export const getChapters = (params) => {
-  return request.get('/admin/chapters/pending', { 
+export const getChapters = params => {
+  return request.get('/admin/chapters/pending', {
     params: {
       page: params.page || 0,
       size: params.size || 20,
@@ -77,8 +79,8 @@ export const getChapters = (params) => {
 }
 
 // 获取所有章节列表（管理用）
-export const getAllChapters = (params) => {
-  return request.get('/admin/chapters', { 
+export const getAllChapters = params => {
+  return request.get('/admin/chapters', {
     params: {
       page: params.page || 0,
       size: params.size || 20,
@@ -88,13 +90,15 @@ export const getAllChapters = (params) => {
 }
 
 // 获取单个章节详情（包含内容）
-export const getChapterDetail = (chapterId) => {
+export const getChapterDetail = chapterId => {
   return request.get(`/admin/chapters/${chapterId}`)
 }
 
 // 审核章节
 export const reviewChapter = (chapterId, status, reviewComment) => {
-  return request.post(`/admin/chapters/${chapterId}/review?status=${encodeURIComponent(status)}&reviewComment=${encodeURIComponent(reviewComment || '')}`)
+  return request.post(
+    `/admin/chapters/${chapterId}/review?status=${encodeURIComponent(status)}&reviewComment=${encodeURIComponent(reviewComment || '')}`
+  )
 }
 
 // 获取分类列表
@@ -114,7 +118,7 @@ export const getCategoryStats = () => {
 }
 
 // 添加分类
-export const addCategory = (data) => {
+export const addCategory = data => {
   return request.post('/admin/categories', data)
 }
 
@@ -124,7 +128,7 @@ export const updateCategory = (categoryId, data) => {
 }
 
 // 删除分类
-export const deleteCategory = (categoryId) => {
+export const deleteCategory = categoryId => {
   return request.delete(`/admin/categories/${categoryId}`)
 }
 
@@ -137,27 +141,27 @@ export const getUsers = (page = 0, size = 20, keyword = '') => {
 }
 
 // 搜索用户
-export const searchUsers = (keyword) => {
+export const searchUsers = keyword => {
   return request.get('/admin/users/search', { params: { keyword } })
 }
 
 // 封禁用户
-export const banUser = (userId) => {
+export const banUser = userId => {
   return request.post(`/admin/users/${userId}/ban`)
 }
 
 // 解封用户
-export const unbanUser = (userId) => {
+export const unbanUser = userId => {
   return request.post(`/admin/users/${userId}/unban`)
 }
 
 // 删除用户
-export const deleteUser = (userId) => {
+export const deleteUser = userId => {
   return request.delete(`/admin/users/${userId}`)
 }
 
 // 创建用户
-export const createUser = (data) => {
+export const createUser = data => {
   return request.post('/admin/users', data)
 }
 
@@ -167,7 +171,7 @@ export const getComments = (page = 0, size = 20) => {
 }
 
 // 删除评论
-export const deleteComment = (commentId) => {
+export const deleteComment = commentId => {
   return request.delete(`/admin/comments/${commentId}`)
 }
 
@@ -177,7 +181,7 @@ export const getTopics = (page = 0, size = 20) => {
 }
 
 // 删除话题
-export const deleteTopic = (topicId) => {
+export const deleteTopic = topicId => {
   return request.delete(`/discussions/admin/${topicId}`)
 }
 
@@ -187,11 +191,9 @@ export const getBooklists = (page = 0, size = 20) => {
 }
 
 // 删除书单
-export const deleteBooklist = (booklistId) => {
+export const deleteBooklist = booklistId => {
   return request.delete(`/booklists/admin/${booklistId}`)
 }
-
-
 
 // 默认导出
 export const adminApi = {

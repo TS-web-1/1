@@ -1,7 +1,7 @@
 <script setup>
 /**
  * History.vue - 阅读历史页面组件
- * 
+ *
  * 该组件实现了用户阅读历史功能，包括：
  * - 展示用户阅读过的小说列表
  * - 显示阅读进度和最后阅读时间
@@ -32,10 +32,16 @@ onMounted(() => {
  * @param {string} dateStr - 日期字符串
  * @returns {string} 格式化后的日期
  */
-const formatLastRead = (dateStr) => {
+const formatLastRead = dateStr => {
   if (!dateStr) return ''
   const d = new Date(dateStr)
-  return d.toLocaleString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+  return d.toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
 }
 
 /**
@@ -54,7 +60,7 @@ const loadHistory = async () => {
     } catch (e) {
       console.log('没有阅读进度数据')
     }
-    
+
     // 如果没有阅读进度，使用书架数据
     if (list.length === 0) {
       try {
@@ -71,11 +77,11 @@ const loadHistory = async () => {
         console.log('获取书架失败:', e)
       }
     }
-    
+
     const novelCache = {}
     const chapterCache = {}
-    
-    const loadNovel = async (novelId) => {
+
+    const loadNovel = async novelId => {
       if (novelCache[novelId]) return novelCache[novelId]
       try {
         const r = await novelApi.getNovelById(novelId)
@@ -86,8 +92,8 @@ const loadHistory = async () => {
       } catch (_) {}
       return null
     }
-    
-    const loadChapters = async (novelId) => {
+
+    const loadChapters = async novelId => {
       if (chapterCache[novelId]) return chapterCache[novelId]
       try {
         const r = await readingApiModule.getNovelChapters(novelId)
@@ -98,33 +104,37 @@ const loadHistory = async () => {
       } catch (_) {}
       return []
     }
-    
-    const items = await Promise.all(list.map(async (p) => {
-      const novel = await loadNovel(p.novelId)
-      const chapters = await loadChapters(p.novelId)
-      
-      let chapterTitle = `章节 ${p.chapterId}`
-      if (chapters && chapters.length > 0) {
-        const currentChapter = chapters.find(ch => ch.id === p.chapterId)
-        if (currentChapter) {
-          chapterTitle = currentChapter.title
-        } else {
-          chapterTitle = chapters[0].title
-          p.chapterId = chapters[0].id
+
+    const items = await Promise.all(
+      list.map(async p => {
+        const novel = await loadNovel(p.novelId)
+        const chapters = await loadChapters(p.novelId)
+
+        let chapterTitle = `章节 ${p.chapterId}`
+        if (chapters && chapters.length > 0) {
+          const currentChapter = chapters.find(ch => ch.id === p.chapterId)
+          if (currentChapter) {
+            chapterTitle = currentChapter.title
+          } else {
+            chapterTitle = chapters[0].title
+            p.chapterId = chapters[0].id
+          }
         }
-      }
-      
-      return {
-        id: p.id,
-        novelId: p.novelId,
-        chapterId: p.chapterId,
-        title: novel?.title || `小说 ${p.novelId}`,
-        author: novel?.author || '',
-        cover: novel?.coverImage ? `/api/novels/${p.novelId}/cover` : 'https://via.placeholder.com/120x160',
-        chapter: chapterTitle,
-        lastRead: formatLastRead(p.lastReadAt)
-      }
-    }))
+
+        return {
+          id: p.id,
+          novelId: p.novelId,
+          chapterId: p.chapterId,
+          title: novel?.title || `小说 ${p.novelId}`,
+          author: novel?.author || '',
+          cover: novel?.coverImage
+            ? `/api/novels/${p.novelId}/cover`
+            : 'https://via.placeholder.com/120x160',
+          chapter: chapterTitle,
+          lastRead: formatLastRead(p.lastReadAt)
+        }
+      })
+    )
     readingHistory.value = items
     // 数据加载完成后滚动到顶部
     window.scrollTo(0, 0)
@@ -137,40 +147,48 @@ const loadHistory = async () => {
   }
 }
 
-const goToNovel = (novelId) => {
+const goToNovel = novelId => {
   router.push(`/novel/${novelId}`)
 }
 
 const goToChapter = async (novelId, chapterId) => {
   try {
     console.log('继续阅读 - novelId:', novelId, 'chapterId:', chapterId)
-    
+
     // 优先从阅读进度获取最新的章节 ID
     try {
       const progressResponse = await readingApi.getReadingProgress(novelId)
       console.log('阅读进度响应:', progressResponse)
-      if (progressResponse.code === 200 && progressResponse.data && progressResponse.data.chapterId) {
+      if (
+        progressResponse.code === 200 &&
+        progressResponse.data &&
+        progressResponse.data.chapterId
+      ) {
         chapterId = progressResponse.data.chapterId
         console.log('使用阅读进度中的 chapterId:', chapterId)
       }
     } catch (e) {
       console.log('获取阅读进度失败:', e)
     }
-    
+
     // 获取章节列表验证 chapterId
     const chaptersResponse = await readingApiModule.getNovelChapters(novelId)
     console.log('章节列表响应:', chaptersResponse)
-    
-    if (chaptersResponse.code === 200 && chaptersResponse.data && chaptersResponse.data.length > 0) {
+
+    if (
+      chaptersResponse.code === 200 &&
+      chaptersResponse.data &&
+      chaptersResponse.data.length > 0
+    ) {
       const chapterExists = chaptersResponse.data.some(ch => ch.id === chapterId)
       console.log('chapterId 是否存在:', chapterExists)
-      
+
       if (!chapterExists || !chapterId) {
         chapterId = chaptersResponse.data[0].id
         console.log('使用第一章 ID:', chapterId)
       }
     }
-    
+
     console.log('最终跳转 chapterId:', chapterId)
     router.push(`/novel/${novelId}/chapter/${chapterId}`)
   } catch (error) {
@@ -185,7 +203,7 @@ const clearHistory = async () => {
   ElMessage.success('阅读历史已清空')
 }
 
-const removeHistoryItem = (id) => {
+const removeHistoryItem = id => {
   readingHistory.value = readingHistory.value.filter(item => item.id !== id)
   ElMessage.success('已移除')
 }
@@ -197,32 +215,20 @@ const removeHistoryItem = (id) => {
       <h1>阅读历史</h1>
       <div class="header-actions">
         <p>共 {{ readingHistory.length }} 本</p>
-        <button 
-          v-if="readingHistory.length > 0" 
-          class="btn-clear" 
-          @click="clearHistory"
-        >
+        <button v-if="readingHistory.length > 0" class="btn-clear" @click="clearHistory">
           清空历史
         </button>
       </div>
     </div>
-    
+
     <div class="history-content">
       <div v-if="loading" class="loading-state">
         <p>加载中...</p>
       </div>
       <div v-else-if="readingHistory.length > 0" class="history-list">
-        <div 
-          v-for="item in readingHistory" 
-          :key="item.id" 
-          class="history-item"
-        >
+        <div v-for="item in readingHistory" :key="item.id" class="history-item">
           <div class="novel-info" @click="goToNovel(item.novelId)">
-            <img 
-              :src="item.cover" 
-              :alt="item.title"
-              class="novel-cover"
-            />
+            <img :src="item.cover" :alt="item.title" class="novel-cover" />
             <div class="novel-details">
               <h3>{{ item.title }}</h3>
               <p class="author">作者：{{ item.author }}</p>
@@ -234,9 +240,7 @@ const removeHistoryItem = (id) => {
             <button class="btn-continue" @click="goToChapter(item.novelId, item.chapterId)">
               继续阅读
             </button>
-            <button class="btn-remove" @click="removeHistoryItem(item.id)">
-              移除
-            </button>
+            <button class="btn-remove" @click="removeHistoryItem(item.id)"> 移除 </button>
           </div>
         </div>
       </div>

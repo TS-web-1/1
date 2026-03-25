@@ -1,7 +1,7 @@
 <script setup>
 /**
  * NotFound.vue - 404页面组件
- * 
+ *
  * 该组件实现了404错误页面，包括：
  * - 错误提示展示
  * - 返回首页按钮
@@ -50,7 +50,7 @@ const goHome = () => {
 .not-found-container h1 {
   font-size: 72px;
   font-weight: bold;
-  color: #409EFF;
+  color: #409eff;
   margin-bottom: 20px;
 }
 
@@ -69,7 +69,7 @@ const goHome = () => {
 
 .btn-primary {
   padding: 10px 24px;
-  background-color: #409EFF;
+  background-color: #409eff;
   color: #fff;
   border: none;
   border-radius: 4px;
@@ -79,6 +79,6 @@ const goHome = () => {
 }
 
 .btn-primary:hover {
-  background-color: #66B1FF;
+  background-color: #66b1ff;
 }
 </style>

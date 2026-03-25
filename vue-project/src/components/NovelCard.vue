@@ -2,7 +2,7 @@
 /**
  * 小说卡片组件
  * 用于展示小说信息，包括封面、标题、作者、简介等
- * 
+ *
  * 优化点：
  * 1. 使用 computed 缓存封面 URL 计算
  * 2. 优化事件处理
@@ -40,13 +40,13 @@ const router = useRouter()
  */
 const coverUrl = computed(() => {
   const { novel } = props
-  
+
   // 如果有 novelId，优先使用 API 获取封面
   if (novel.id) {
     const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'
     return `${baseUrl}/novels/${novel.id}/cover`
   }
-  
+
   // 否则使用传入的 cover 或默认图片
   return novel.cover || 'https://picsum.photos/seed/default/300/400'
 })
@@ -54,13 +54,13 @@ const coverUrl = computed(() => {
 /**
  * 格式化数字 - 使用 computed 缓存
  */
-const formatNumber = (num) => {
+const formatNumber = num => {
   if (!num) return '0'
   if (num >= 10000) {
-    return (num / 10000).toFixed(1) + 'w'
+    return `${(num / 10000).toFixed(1)}w`
   }
   if (num >= 1000) {
-    return (num / 1000).toFixed(1) + 'k'
+    return `${(num / 1000).toFixed(1)}k`
   }
   return num.toString()
 }
@@ -77,7 +77,7 @@ const handleClick = () => {
  * 处理键盘事件
  * @param {KeyboardEvent} e
  */
-const handleKeyDown = (e) => {
+const handleKeyDown = e => {
   if (e.key === 'Enter' || e.key === ' ') {
     e.preventDefault()
     handleClick()
@@ -88,40 +88,38 @@ const handleKeyDown = (e) => {
  * 处理图片加载失败事件
  * @param {Event} e 事件对象
  */
-const handleImageError = (e) => {
+const handleImageError = e => {
   // 当图片加载失败时，使用默认图片
   e.target.src = 'https://picsum.photos/seed/default/300/400'
 }
 </script>
 
 <template>
-  <article 
-    class="novel-card" 
-    @click="handleClick"
-    @keydown="handleKeyDown"
+  <article
+    class="novel-card"
     tabindex="0"
     role="button"
     :aria-label="`查看小说详情：${novel.title}`"
+    @click="handleClick"
+    @keydown="handleKeyDown"
   >
     <div class="card-cover">
       <!-- 使用 computed 的 coverUrl -->
-      <img 
-        :src="coverUrl" 
-        :alt="novel.title" 
-        loading="lazy" 
-        @error="handleImageError"
+      <img
+        :src="coverUrl"
+        :alt="novel.title"
+        loading="lazy"
         decoding="async"
+        @error="handleImageError"
       />
       <div class="cover-overlay"></div>
       <div class="card-badges">
-        <span 
-          :class="['badge', novel.status === 'COMPLETED' ? 'completed' : 'ongoing']"
-        >
+        <span :class="['badge', novel.status === 'COMPLETED' ? 'completed' : 'ongoing']">
           {{ novel.status === 'COMPLETED' ? '完结' : '连载' }}
         </span>
       </div>
     </div>
-    
+
     <div class="card-content">
       <h3 class="card-title">{{ novel.title }}</h3>
       <p class="card-author">{{ novel.author }}</p>
@@ -130,21 +128,44 @@ const handleImageError = (e) => {
         <span class="card-category">{{ novel.category }}</span>
         <div class="card-stats">
           <span class="stat" :title="`浏览：${novel.views || 0}`">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-              <circle cx="12" cy="12" r="3"/>
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+              <circle cx="12" cy="12" r="3" />
             </svg>
             {{ formatNumber(novel.views) }}
           </span>
           <span class="stat" :title="`收藏：${novel.bookmarks || 0}`">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
             </svg>
             {{ formatNumber(novel.bookmarks) }}
           </span>
           <span class="stat" :title="`点赞：${novel.totalLikes || 0}`">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+              />
             </svg>
             {{ formatNumber(novel.totalLikes) }}
           </span>
@@ -182,7 +203,9 @@ const handleImageError = (e) => {
 .novel-card:hover {
   transform: translateY(-6px);
   border-color: rgba(201, 169, 98, 0.3);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(201, 169, 98, 0.1);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(201, 169, 98, 0.1);
 }
 
 .novel-card:hover::before {
@@ -215,12 +238,7 @@ const handleImageError = (e) => {
 .cover-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    180deg,
-    transparent 0%,
-    transparent 50%,
-    rgba(13, 17, 23, 0.8) 100%
-  );
+  background: linear-gradient(180deg, transparent 0%, transparent 50%, rgba(13, 17, 23, 0.8) 100%);
   pointer-events: none;
 }
 
@@ -336,15 +354,15 @@ const handleImageError = (e) => {
   .card-content {
     padding: 12px;
   }
-  
+
   .card-title {
     font-size: 14px;
   }
-  
+
   .card-author {
     font-size: 12px;
   }
-  
+
   .card-description {
     font-size: 11px;
   }

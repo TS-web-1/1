@@ -6,14 +6,14 @@
     </div>
 
     <div class="community-tabs">
-      <button 
-        :class="['tab-btn', { active: activeTab === 'topics' }]" 
+      <button
+        :class="['tab-btn', { active: activeTab === 'topics' }]"
         @click="activeTab = 'topics'"
       >
         话题讨论
       </button>
-      <button 
-        :class="['tab-btn', { active: activeTab === 'booklists' }]" 
+      <button
+        :class="['tab-btn', { active: activeTab === 'booklists' }]"
         @click="activeTab = 'booklists'"
       >
         书单分享
@@ -30,12 +30,7 @@
         </div>
 
         <div class="topics-list">
-          <div 
-            v-for="topic in topics" 
-            :key="topic.id" 
-            class="topic-card"
-            @click="viewTopic(topic)"
-          >
+          <div v-for="topic in topics" :key="topic.id" class="topic-card" @click="viewTopic(topic)">
             <div class="topic-header">
               <img :src="topic.authorAvatar || defaultAvatar" class="author-avatar" />
               <div class="topic-info">
@@ -48,10 +43,13 @@
             </div>
             <h3 class="topic-title">{{ topic.title }}</h3>
             <p class="topic-content">
-              <template v-for="(part, index) in renderContentWithNovelLinks(topic.content)" :key="index">
+              <template
+                v-for="(part, index) in renderContentWithNovelLinks(topic.content)"
+                :key="index"
+              >
                 <template v-if="part.type === 'text'">{{ part.content }}</template>
-                <span 
-                  v-else-if="part.type === 'novel'" 
+                <span
+                  v-else-if="part.type === 'novel'"
                   class="novel-link"
                   :class="{ 'has-link': part.id }"
                   @click.stop="handleNovelClick(part.id, part.name)"
@@ -69,10 +67,10 @@
                 <span class="stat-icon">💬</span>
                 {{ topic.replyCount }}
               </span>
-              <span 
-                class="topic-stat like-btn" 
+              <span
+                class="topic-stat like-btn"
                 :class="{ liked: topic.isLiked }"
-                @click="(e) => likeTopic(topic, e)"
+                @click="e => likeTopic(topic, e)"
               >
                 <span class="stat-icon heart-icon">{{ topic.isLiked ? '❤️' : '🤍' }}</span>
                 {{ topic.likes }}
@@ -80,11 +78,11 @@
             </div>
           </div>
         </div>
-        
+
         <!-- 话题分页 -->
         <div v-if="topicsTotalPages > 1" class="pagination">
-          <button 
-            class="page-btn" 
+          <button
+            class="page-btn"
             :disabled="topicsPage === 0"
             @click="changeTopicsPage(topicsPage - 1)"
           >
@@ -93,8 +91,8 @@
           <span class="page-info">
             第 {{ topicsPage + 1 }} 页 / 共 {{ topicsTotalPages }} 页 ({{ topicsTotalElements }} 条)
           </span>
-          <button 
-            class="page-btn" 
+          <button
+            class="page-btn"
             :disabled="topicsPage === topicsTotalPages - 1"
             @click="changeTopicsPage(topicsPage + 1)"
           >
@@ -112,17 +110,17 @@
         </div>
 
         <div class="booklists-grid">
-          <div 
-            v-for="booklist in booklists" 
-            :key="booklist.id" 
+          <div
+            v-for="booklist in booklists"
+            :key="booklist.id"
             class="booklist-card"
             @click="viewBooklist(booklist)"
           >
             <div class="booklist-covers">
-              <img 
-                v-for="(cover, index) in booklist.covers.slice(0, 3)" 
+              <img
+                v-for="(cover, index) in booklist.covers.slice(0, 3)"
                 :key="index"
-                :src="cover || defaultCover" 
+                :src="cover || defaultCover"
                 class="cover-img"
               />
               <div v-if="booklist.covers.length === 0" class="empty-covers">
@@ -134,8 +132,13 @@
               <p class="booklist-desc">{{ booklist.description }}</p>
               <div class="booklist-meta">
                 <span class="book-count">📚 {{ booklist.novelCount }} 本书</span>
-                <span class="booklist-likes" :class="{ liked: booklist.isLiked }" @click="(e) => likeBooklist(booklist, e)">
-                  <span class="heart-icon">{{ booklist.isLiked ? '❤️' : '🤍' }}</span> {{ booklist.likes }}
+                <span
+                  class="booklist-likes"
+                  :class="{ liked: booklist.isLiked }"
+                  @click="e => likeBooklist(booklist, e)"
+                >
+                  <span class="heart-icon">{{ booklist.isLiked ? '❤️' : '🤍' }}</span>
+                  {{ booklist.likes }}
                 </span>
               </div>
               <div class="booklist-creator">
@@ -146,21 +149,24 @@
             </div>
           </div>
         </div>
-        
+
         <!-- 书单分页 -->
         <div v-if="booklistsTotalPages > 1" class="pagination">
-          <button 
-            class="page-btn" 
+          <button
+            class="page-btn"
             :disabled="booklistsPage === 0"
             @click="changeBooklistsPage(booklistsPage - 1)"
           >
             上一页
           </button>
           <span class="page-info">
-            第 {{ booklistsPage + 1 }} 页 / 共 {{ booklistsTotalPages }} 页 ({{ booklistsTotalElements }} 条)
+            第 {{ booklistsPage + 1 }} 页 / 共 {{ booklistsTotalPages }} 页 ({{
+              booklistsTotalElements
+            }}
+            条)
           </span>
-          <button 
-            class="page-btn" 
+          <button
+            class="page-btn"
             :disabled="booklistsPage === booklistsTotalPages - 1"
             @click="changeBooklistsPage(booklistsPage + 1)"
           >
@@ -180,17 +186,33 @@
         <form @submit.prevent="createTopic">
           <div class="form-group">
             <label>话题标题 <span class="required">*</span></label>
-            <input v-model="newTopic.title" type="text" placeholder="输入话题标题，让更多人看到" required maxlength="100" />
+            <input
+              v-model="newTopic.title"
+              type="text"
+              placeholder="输入话题标题，让更多人看到"
+              required
+              maxlength="100"
+            />
             <span class="char-count">{{ newTopic.title.length }}/100</span>
           </div>
           <div class="form-group">
             <label>话题内容 <span class="required">*</span></label>
-            <textarea v-model="newTopic.content" placeholder="分享你的想法，和大家一起讨论..." required maxlength="2000"></textarea>
+            <textarea
+              v-model="newTopic.content"
+              placeholder="分享你的想法，和大家一起讨论..."
+              required
+              maxlength="2000"
+            ></textarea>
             <span class="char-count">{{ newTopic.content.length }}/2000</span>
           </div>
           <div class="form-group">
             <label>标签 <span class="hint">（选填，用空格分隔）</span></label>
-            <input v-model="newTopic.tagsInput" type="text" placeholder="例如：玄幻 推荐 讨论" @input="newTopic.tags = $event.target.value.split(' ').filter(t => t)" />
+            <input
+              v-model="newTopic.tagsInput"
+              type="text"
+              placeholder="例如：玄幻 推荐 讨论"
+              @input="newTopic.tags = $event.target.value.split(' ').filter(t => t)"
+            />
             <div v-if="newTopic.tags.length > 0" class="tags-preview">
               <span v-for="tag in newTopic.tags" :key="tag" class="tag">{{ tag }}</span>
             </div>
@@ -214,17 +236,23 @@
           <div class="form-row">
             <div class="form-group form-group-half">
               <label>书单名称 <span class="required">*</span></label>
-              <input v-model="newBooklist.title" type="text" placeholder="给你的书单起个名字" required maxlength="50" />
+              <input
+                v-model="newBooklist.title"
+                type="text"
+                placeholder="给你的书单起个名字"
+                required
+                maxlength="50"
+              />
             </div>
             <div class="form-group form-group-half">
               <label>公开设置</label>
               <div class="radio-group">
                 <label class="radio-label">
-                  <input type="radio" v-model="newBooklist.isPublic" value="true" />
+                  <input v-model="newBooklist.isPublic" type="radio" value="true" />
                   <span>公开</span>
                 </label>
                 <label class="radio-label">
-                  <input type="radio" v-model="newBooklist.isPublic" value="false" />
+                  <input v-model="newBooklist.isPublic" type="radio" value="false" />
                   <span>私密</span>
                 </label>
               </div>
@@ -232,22 +260,40 @@
           </div>
           <div class="form-group">
             <label>书单描述</label>
-            <textarea v-model="newBooklist.description" placeholder="介绍一下你的书单，让更多人了解..." maxlength="500"></textarea>
+            <textarea
+              v-model="newBooklist.description"
+              placeholder="介绍一下你的书单，让更多人了解..."
+              maxlength="500"
+            ></textarea>
             <span class="char-count">{{ newBooklist.description.length }}/500</span>
           </div>
           <div class="form-group">
-            <label>选择小说 <span class="hint">（已选择 {{ newBooklist.selectedNovels.length }} 本）</span></label>
+            <label
+              >选择小说
+              <span class="hint">（已选择 {{ newBooklist.selectedNovels.length }} 本）</span></label
+            >
             <div class="novel-search">
-              <input v-model="novelSearchKeyword" type="text" placeholder="搜索小说名称或作者" @input="handleNovelSearch" />
+              <input
+                v-model="novelSearchKeyword"
+                type="text"
+                placeholder="搜索小说名称或作者"
+                @input="handleNovelSearch"
+              />
             </div>
             <div class="novels-selection">
-              <div v-if="recommendedNovels.length > 0 && !novelSearchKeyword" class="recommended-novels">
+              <div
+                v-if="recommendedNovels.length > 0 && !novelSearchKeyword"
+                class="recommended-novels"
+              >
                 <h4>推荐小说</h4>
                 <div class="recommended-novels-grid">
-                  <div v-for="novel in recommendedNovels" :key="novel.id" 
-                       class="novel-select-item recommended"
-                       :class="{ selected: isNovelSelected(novel) }"
-                       @click="toggleNovelSelection(novel)">
+                  <div
+                    v-for="novel in recommendedNovels"
+                    :key="novel.id"
+                    class="novel-select-item recommended"
+                    :class="{ selected: isNovelSelected(novel) }"
+                    @click="toggleNovelSelection(novel)"
+                  >
                     <img :src="novel.cover" class="novel-select-cover" />
                     <div class="novel-select-info">
                       <span class="novel-select-title">{{ novel.title }}</span>
@@ -261,10 +307,13 @@
                 <h4 v-if="!novelSearchKeyword">全部小说</h4>
                 <h4 v-else>搜索结果</h4>
                 <div class="all-novels-grid">
-                  <div v-for="novel in filteredNovels" :key="novel.id" 
-                       class="novel-select-item"
-                       :class="{ selected: isNovelSelected(novel) }"
-                       @click="toggleNovelSelection(novel)">
+                  <div
+                    v-for="novel in filteredNovels"
+                    :key="novel.id"
+                    class="novel-select-item"
+                    :class="{ selected: isNovelSelected(novel) }"
+                    @click="toggleNovelSelection(novel)"
+                  >
                     <img :src="novel.cover" class="novel-select-cover" />
                     <div class="novel-select-info">
                       <span class="novel-select-title">{{ novel.title }}</span>
@@ -280,8 +329,14 @@
             </div>
           </div>
           <div class="form-actions">
-            <button type="button" class="cancel-btn" @click="showCreateBooklist = false">取消</button>
-            <button type="submit" class="submit-btn" :disabled="newBooklist.selectedNovels.length === 0">
+            <button type="button" class="cancel-btn" @click="showCreateBooklist = false"
+              >取消</button
+            >
+            <button
+              type="submit"
+              class="submit-btn"
+              :disabled="newBooklist.selectedNovels.length === 0"
+            >
               创建书单 ({{ newBooklist.selectedNovels.length }}本)
             </button>
           </div>
@@ -290,7 +345,11 @@
     </div>
 
     <!-- 话题详情弹窗 -->
-    <div v-if="showTopicDetail && currentTopic" class="modal-overlay" @click.self="showTopicDetail = false">
+    <div
+      v-if="showTopicDetail && currentTopic"
+      class="modal-overlay"
+      @click.self="showTopicDetail = false"
+    >
       <div class="modal-content modal-large">
         <div class="modal-header">
           <h2>话题详情</h2>
@@ -309,10 +368,13 @@
           </div>
           <h3 class="topic-detail-title">{{ currentTopic.title }}</h3>
           <p class="topic-detail-content">
-            <template v-for="(part, index) in renderContentWithNovelLinks(currentTopic.content)" :key="index">
+            <template
+              v-for="(part, index) in renderContentWithNovelLinks(currentTopic.content)"
+              :key="index"
+            >
               <template v-if="part.type === 'text'">{{ part.content }}</template>
-              <span 
-                v-else-if="part.type === 'novel'" 
+              <span
+                v-else-if="part.type === 'novel'"
                 class="novel-link"
                 :class="{ 'has-link': part.id }"
                 @click.stop="handleNovelClick(part.id, part.name)"
@@ -322,12 +384,17 @@
             </template>
           </p>
           <div class="topic-detail-actions">
-            <button class="action-btn" :class="{ liked: currentTopic.isLiked }" @click="likeTopic(currentTopic, $event)">
-              <span class="heart-icon">{{ currentTopic.isLiked ? '❤️' : '🤍' }}</span> {{ currentTopic.isLiked ? '已赞' : '点赞' }} ({{ currentTopic.likes }})
+            <button
+              class="action-btn"
+              :class="{ liked: currentTopic.isLiked }"
+              @click="likeTopic(currentTopic, $event)"
+            >
+              <span class="heart-icon">{{ currentTopic.isLiked ? '❤️' : '🤍' }}</span>
+              {{ currentTopic.isLiked ? '已赞' : '点赞' }} ({{ currentTopic.likes }})
             </button>
             <span class="view-count">👁 {{ currentTopic.views }} 次浏览</span>
           </div>
-          
+
           <div class="replies-section">
             <h4>评论 ({{ currentTopic.replies.length }})</h4>
             <div class="reply-input-area">
@@ -358,7 +425,11 @@
     </div>
 
     <!-- 书单详情弹窗 -->
-    <div v-if="showBooklistDetail && currentBooklist" class="modal-overlay" @click.self="showBooklistDetail = false">
+    <div
+      v-if="showBooklistDetail && currentBooklist"
+      class="modal-overlay"
+      @click.self="showBooklistDetail = false"
+    >
       <div class="modal-content modal-large">
         <div class="modal-header">
           <h2>书单详情</h2>
@@ -373,15 +444,25 @@
               <span class="creator-name">by {{ currentBooklist.creatorName }}</span>
               <span class="create-time">{{ formatTime(currentBooklist.createdAt) }}</span>
               <span class="book-count">📚 {{ currentBooklist.novelCount }} 本书</span>
-              <button class="like-btn-large" :class="{ liked: currentBooklist.isLiked }" @click="likeBooklist(currentBooklist, $event)">
-                <span class="heart-icon">{{ currentBooklist.isLiked ? '❤️' : '🤍' }}</span> {{ currentBooklist.likes }}
+              <button
+                class="like-btn-large"
+                :class="{ liked: currentBooklist.isLiked }"
+                @click="likeBooklist(currentBooklist, $event)"
+              >
+                <span class="heart-icon">{{ currentBooklist.isLiked ? '❤️' : '🤍' }}</span>
+                {{ currentBooklist.likes }}
               </button>
             </div>
           </div>
           <div class="booklist-novels">
             <h4>书单内容</h4>
             <div class="booklist-novels-grid">
-              <div v-for="novel in currentBooklist.novels" :key="novel.id" class="booklist-novel-item" @click="goToNovel(novel.id)">
+              <div
+                v-for="novel in currentBooklist.novels"
+                :key="novel.id"
+                class="booklist-novel-item"
+                @click="goToNovel(novel.id)"
+              >
                 <img :src="novel.cover" class="novel-cover" />
                 <div class="novel-info">
                   <span class="novel-title">{{ novel.title }}</span>
@@ -402,7 +483,7 @@
 <script setup>
 /**
  * Community.vue - 社区页面组件
- * 
+ *
  * 该组件实现了社区功能，包括：
  * - 话题讨论列表和详情
  * - 书单分享列表和详情
@@ -464,9 +545,9 @@ const filteredNovels = computed(() => {
     return novels.value
   }
   const keyword = novelSearchKeyword.value.toLowerCase()
-  return novels.value.filter(novel => 
-    novel.title.toLowerCase().includes(keyword) || 
-    novel.author.toLowerCase().includes(keyword)
+  return novels.value.filter(
+    novel =>
+      novel.title.toLowerCase().includes(keyword) || novel.author.toLowerCase().includes(keyword)
   )
 })
 
@@ -525,7 +606,7 @@ const novelMappingCache = ref({
  * @param {string} dateStr - 日期字符串
  * @returns {string} 格式化后的时间
  */
-const formatTime = (dateStr) => {
+const formatTime = dateStr => {
   if (!dateStr) return ''
   const date = new Date(dateStr)
   const now = new Date()
@@ -544,14 +625,14 @@ const formatTime = (dateStr) => {
  * @param {Object} d - API返回的话题数据
  * @returns {Object} 前端格式的话题对象
  */
-const mapTopicFromApi = (d) => {
+const mapTopicFromApi = d => {
   const user = d.user || {}
   return {
     id: d.id,
     title: d.title,
     content: d.content || '',
     authorName: user.username || user.nickname || '用户',
-    authorAvatar: user.avatar ? `${user.avatar}` : (defaultAvatar + (d.id || '')),
+    authorAvatar: user.avatar ? `${user.avatar}` : defaultAvatar + (d.id || ''),
     views: d.views != null ? d.views : 0,
     replyCount: d.replies != null ? d.replies : 0,
     likes: d.likes != null ? d.likes : 0,
@@ -589,23 +670,23 @@ const loadTopics = async (page = 0) => {
  * @param {Array} novels - 小说列表
  * @returns {Object} 小说名称到ID的映射对象
  */
-const buildNovelMapping = (novels) => {
+const buildNovelMapping = novels => {
   const mapping = {}
-  
+
   novels.forEach(novel => {
     if (!novel.id) return
-    
+
     if (novel.title) {
       mapping[novel.title] = novel.id
     }
-    
+
     if (novel.aliases && Array.isArray(novel.aliases)) {
       novel.aliases.forEach(alias => {
         mapping[alias] = novel.id
       })
     }
   })
-  
+
   return mapping
 }
 
@@ -616,28 +697,26 @@ const buildNovelMapping = (novels) => {
 const loadNovelMapping = async (forceRefresh = false) => {
   const now = Date.now()
   const cacheAge = now - novelMappingCache.value.timestamp
-  
-  if (!forceRefresh && 
-      novelMappingCache.value.data && 
-      cacheAge < NOVEL_MAPPING_CACHE_DURATION) {
+
+  if (!forceRefresh && novelMappingCache.value.data && cacheAge < NOVEL_MAPPING_CACHE_DURATION) {
     novelNameToIdMap.value = novelMappingCache.value.data
     return
   }
-  
+
   if (novelMappingLoading.value) return
-  
+
   try {
     novelMappingLoading.value = true
     const res = await novelApi.getNovels()
-    
+
     if (res.code === 200 && Array.isArray(res.data)) {
       const mapping = buildNovelMapping(res.data)
-      
+
       novelMappingCache.value = {
         data: mapping,
         timestamp: now
       }
-      
+
       novelNameToIdMap.value = mapping
     }
   } catch (error) {
@@ -659,39 +738,39 @@ const refreshNovelMapping = () => {
  * @param {string} content - 原始内容
  * @returns {Array} 包含文本和链接的数组
  */
-const renderContentWithNovelLinks = (content) => {
+const renderContentWithNovelLinks = content => {
   if (!content) return ''
-  
+
   // 匹配《小说名》格式的文本
   const regex = /《([^》]+)》/g
   const parts = []
   let lastIndex = 0
   let match
-  
+
   while ((match = regex.exec(content)) !== null) {
     // 添加匹配前的普通文本
     if (match.index > lastIndex) {
       parts.push({ type: 'text', content: content.slice(lastIndex, match.index) })
     }
-    
+
     // 添加小说名称链接
     const novelName = match[1]
     const novelId = novelNameToIdMap.value[novelName]
-    parts.push({ 
-      type: 'novel', 
-      name: novelName, 
+    parts.push({
+      type: 'novel',
+      name: novelName,
       id: novelId,
       fullMatch: match[0]
     })
-    
+
     lastIndex = match.index + match[0].length
   }
-  
+
   // 添加剩余文本
   if (lastIndex < content.length) {
     parts.push({ type: 'text', content: content.slice(lastIndex) })
   }
-  
+
   return parts
 }
 
@@ -717,9 +796,9 @@ const loadBooklists = async (page = 0) => {
     console.log('=== 开始加载书单 ===')
     const res = await discussionApi.getPublicBooklistsPaginated(page, booklistsSize.value)
     console.log('公开书单API响应:', res)
-    
+
     let booklistData = []
-    
+
     if (res.code === 200 && res.data && res.data.content && res.data.content.length > 0) {
       console.log('公开书单数据:', res.data.content)
       booklistData = res.data.content.map(booklist => ({
@@ -731,7 +810,7 @@ const loadBooklists = async (page = 0) => {
         novelCount: booklist.bookCount || 0,
         likes: booklist.likeCount || 0,
         isLiked: false,
-        covers: [], 
+        covers: [],
         novels: [],
         createdAt: booklist.createdAt
       }))
@@ -745,22 +824,22 @@ const loadBooklists = async (page = 0) => {
         console.log('用户书单API响应:', userRes)
         if (userRes.code === 200 && userRes.data) {
           booklistData = userRes.data.map(booklist => ({
-             id: booklist.id,
-             title: booklist.title,
-             description: booklist.description || '',
-             creatorName: currentUser.value.username || '我',
-             creatorAvatar: currentUser.value.avatar || defaultAvatar,
-             novelCount: booklist.novels?.length || 0,
-             likes: booklist.likes || 0,
-             isLiked: false,
-             covers: [],
-             novels: booklist.novels || [],
-             createdAt: booklist.createdAt
-           }))
+            id: booklist.id,
+            title: booklist.title,
+            description: booklist.description || '',
+            creatorName: currentUser.value.username || '我',
+            creatorAvatar: currentUser.value.avatar || defaultAvatar,
+            novelCount: booklist.novels?.length || 0,
+            likes: booklist.likes || 0,
+            isLiked: false,
+            covers: [],
+            novels: booklist.novels || [],
+            createdAt: booklist.createdAt
+          }))
         }
       }
     }
-    
+
     console.log('解析后的书单列表:', booklistData)
     booklists.value = booklistData
   } catch (error) {
@@ -819,7 +898,7 @@ const loadRecommendedNovels = async () => {
  * 查看话题详情
  * @param {Object} topic - 话题对象
  */
-const viewTopic = (topic) => {
+const viewTopic = topic => {
   currentTopic.value = topic
   showTopicDetail.value = true
   topic.views++
@@ -829,12 +908,12 @@ const viewTopic = (topic) => {
  * 查看书单详情
  * @param {Object} booklist - 书单对象
  */
-const viewBooklist = async (booklist) => {
+const viewBooklist = async booklist => {
   try {
     // 调用后端 API 获取书单详情（包含小说列表）
     const res = await discussionApi.getBooklistById(booklist.id)
     console.log('书单详情 API 响应:', res)
-    
+
     if (res && res.data) {
       // 更新当前书单为完整的详情数据
       currentBooklist.value = {
@@ -930,11 +1009,11 @@ const createBooklist = async () => {
     ElMessage.warning('请填写书单名称')
     return
   }
-  
+
   try {
     const isPublicValue = true
     console.log('创建书单 - isPublic 强制设置为:', isPublicValue)
-    
+
     const res = await discussionApi.createBooklist({
       userId: currentUser.value.id,
       title: newBooklist.value.title.trim(),
@@ -942,7 +1021,7 @@ const createBooklist = async () => {
       isPublic: isPublicValue,
       novelIds: newBooklist.value.selectedNovels.map(novel => novel.id)
     })
-    
+
     if (res.code === 200 && res.data) {
       // 构建前端显示的数据结构
       const booklist = {
@@ -950,7 +1029,7 @@ const createBooklist = async () => {
         title: res.data.title,
         description: res.data.description,
         creatorName: currentUser.value.name,
-        creatorAvatar: currentUser.value.avatar || defaultAvatar + 'me',
+        creatorAvatar: currentUser.value.avatar || `${defaultAvatar}me`,
         novelCount: newBooklist.value.selectedNovels.length,
         likes: 0,
         isLiked: false,
@@ -958,12 +1037,12 @@ const createBooklist = async () => {
         novels: newBooklist.value.selectedNovels,
         createdAt: new Date()
       }
-      
+
       booklists.value.unshift(booklist)
       showCreateBooklist.value = false
       newBooklist.value = { title: '', description: '', selectedNovels: [], isPublic: true }
       ElMessage.success('书单创建成功！')
-      
+
       // 刷新小说映射以获取最新数据
       refreshNovelMapping()
     } else {
@@ -979,7 +1058,7 @@ const createBooklist = async () => {
  * 切换小说选择状态
  * @param {Object} novel - 小说对象
  */
-const toggleNovelSelection = (novel) => {
+const toggleNovelSelection = novel => {
   const index = newBooklist.value.selectedNovels.findIndex(n => n.id === novel.id)
   if (index > -1) {
     newBooklist.value.selectedNovels.splice(index, 1)
@@ -993,7 +1072,7 @@ const toggleNovelSelection = (novel) => {
  * @param {Object} novel - 小说对象
  * @returns {boolean} 是否已选中
  */
-const isNovelSelected = (novel) => {
+const isNovelSelected = novel => {
   return newBooklist.value.selectedNovels.some(n => n.id === novel.id)
 }
 
@@ -1005,16 +1084,16 @@ const submitReply = () => {
     ElMessage.warning('请输入回复内容')
     return
   }
-  
+
   const reply = {
     id: Date.now(),
     authorName: currentUser.value.name,
-    authorAvatar: currentUser.value.avatar || defaultAvatar + 'me',
+    authorAvatar: currentUser.value.avatar || `${defaultAvatar}me`,
     content: newReply.value,
     likes: 0,
     createdAt: new Date()
   }
-  
+
   currentTopic.value.replies.push(reply)
   currentTopic.value.replyCount++
   newReply.value = ''
@@ -1025,7 +1104,7 @@ const submitReply = () => {
  * 跳转到小说详情页
  * @param {number} novelId - 小说ID
  */
-const goToNovel = (novelId) => {
+const goToNovel = novelId => {
   router.push(`/novel/${novelId}`)
 }
 
@@ -1033,7 +1112,7 @@ const goToNovel = (novelId) => {
  * 话题分页控制
  * @param {number} page - 页码
  */
-const changeTopicsPage = (page) => {
+const changeTopicsPage = page => {
   if (page >= 0 && page < topicsTotalPages.value) {
     loadTopics(page)
   }
@@ -1043,7 +1122,7 @@ const changeTopicsPage = (page) => {
  * 书单分页控制
  * @param {number} page - 页码
  */
-const changeBooklistsPage = (page) => {
+const changeBooklistsPage = page => {
   if (page >= 0 && page < booklistsTotalPages.value) {
     loadBooklists(page)
   }
@@ -1063,7 +1142,7 @@ onMounted(() => {
  * 监听创建书单弹窗状态
  * 弹窗打开时加载推荐小说
  */
-watch(showCreateBooklist, async (newValue) => {
+watch(showCreateBooklist, async newValue => {
   if (newValue) {
     await loadRecommendedNovels()
   }

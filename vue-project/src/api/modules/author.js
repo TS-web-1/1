@@ -3,7 +3,7 @@ import apiClient from '../api.js'
 
 export const authorApi = {
   // ==================== 作品管理 ====================
-  
+
   // 发布新作品
   publishNovel(data) {
     return apiClient.post('/author/novels', data)
@@ -83,7 +83,7 @@ export const authorApi = {
   getAuthorStats() {
     return apiClient.get('/author/stats')
   },
-  
+
   // 获取阅读趋势数据
   getReadingTrend() {
     return apiClient.get('/author/reading-trend')

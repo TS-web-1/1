@@ -1,24 +1,24 @@
 <template>
   <div class="my-booklists">
     <h1>我的书单</h1>
-    
+
     <div v-if="loading" class="loading">加载中...</div>
-    
+
     <div v-else-if="booklists.length === 0" class="empty">
       <p>暂无书单</p>
-      <button @click="goToCommunity" class="create-btn">创建书单</button>
+      <button class="create-btn" @click="goToCommunity">创建书单</button>
     </div>
-    
+
     <div v-else class="booklists-grid">
-      <div 
-        v-for="booklist in booklists" 
-        :key="booklist.id" 
-        class="booklist-card"
-      >
+      <div v-for="booklist in booklists" :key="booklist.id" class="booklist-card">
         <div class="booklist-cover">
-          <img 
-            v-if="booklist.novels && booklist.novels.length > 0" 
-            :src="booklist.novels[0].coverImage ? `/api/novels/${booklist.novels[0].id}/cover` : 'https://via.placeholder.com/300x200'" 
+          <img
+            v-if="booklist.novels && booklist.novels.length > 0"
+            :src="
+              booklist.novels[0].coverImage
+                ? `/api/novels/${booklist.novels[0].id}/cover`
+                : 'https://via.placeholder.com/300x200'
+            "
             :alt="booklist.title"
           />
           <img v-else src="https://via.placeholder.com/300x200" :alt="booklist.title" />
@@ -32,8 +32,8 @@
           </div>
         </div>
         <div class="booklist-actions">
-          <button @click="viewBooklist(booklist.id)" class="view-btn">查看</button>
-          <button @click="deleteBooklist(booklist.id)" class="delete-btn">删除</button>
+          <button class="view-btn" @click="viewBooklist(booklist.id)">查看</button>
+          <button class="delete-btn" @click="deleteBooklist(booklist.id)">删除</button>
         </div>
       </div>
     </div>
@@ -43,7 +43,7 @@
 <script setup>
 /**
  * MyBooklists.vue - 我的书单页面组件
- * 
+ *
  * 该组件实现了用户书单管理功能，包括：
  * - 展示用户创建的书单列表
  * - 查看书单详情
@@ -90,7 +90,7 @@ const loadMyBooklists = async () => {
  * 查看书单详情
  * @param {number} booklistId - 书单ID
  */
-const viewBooklist = (booklistId) => {
+const viewBooklist = booklistId => {
   router.push(`/booklist/${booklistId}`)
 }
 
@@ -98,9 +98,9 @@ const viewBooklist = (booklistId) => {
  * 删除书单
  * @param {number} booklistId - 书单ID
  */
-const deleteBooklist = async (booklistId) => {
+const deleteBooklist = async booklistId => {
   if (!confirm('确定要删除这个书单吗？')) return
-  
+
   try {
     const response = await discussionApi.deleteBooklist(booklistId)
     if (response.code === 200) {
@@ -119,7 +119,7 @@ const goToCommunity = () => {
   router.push('/community')
 }
 
-const formatTime = (dateString) => {
+const formatTime = dateString => {
   const date = new Date(dateString)
   return date.toLocaleDateString()
 }
@@ -139,7 +139,8 @@ h1 {
   color: #333;
 }
 
-.loading, .empty {
+.loading,
+.empty {
   text-align: center;
   padding: 60px 20px;
   color: #999;
@@ -148,7 +149,7 @@ h1 {
 .create-btn {
   margin-top: 16px;
   padding: 10px 24px;
-  background: #409EFF;
+  background: #409eff;
   color: #fff;
   border: none;
   border-radius: 4px;
@@ -222,7 +223,8 @@ h1 {
   border-top: 1px solid #f0f0f0;
 }
 
-.view-btn, .delete-btn {
+.view-btn,
+.delete-btn {
   flex: 1;
   padding: 8px;
   border: none;
@@ -231,7 +233,7 @@ h1 {
 }
 
 .view-btn {
-  background: #409EFF;
+  background: #409eff;
   color: #fff;
 }
 

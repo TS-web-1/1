@@ -1,30 +1,22 @@
 <template>
   <div class="my-comments">
     <h1>我的评论</h1>
-    
+
     <div v-if="loading" class="loading">加载中...</div>
-    
+
     <div v-else-if="comments.length === 0" class="empty">
       <p>暂无评论</p>
     </div>
-    
+
     <div v-else class="comments-list">
-      <div 
-        v-for="comment in comments" 
-        :key="comment.id" 
-        class="comment-item"
-      >
+      <div v-for="comment in comments" :key="comment.id" class="comment-item">
         <div class="comment-header">
           <span class="novel-title">{{ comment.novelTitle || '小说' }}</span>
           <span class="comment-time">{{ formatTime(comment.createdAt) }}</span>
         </div>
         <div class="comment-content">{{ comment.content }}</div>
         <div class="comment-actions">
-          <button 
-            v-if="!comment.deleted"
-            @click="deleteComment(comment.id)" 
-            class="delete-btn"
-          >
+          <button v-if="!comment.deleted" class="delete-btn" @click="deleteComment(comment.id)">
             删除
           </button>
         </div>
@@ -36,7 +28,7 @@
 <script setup>
 /**
  * MyComments.vue - 我的评论页面组件
- * 
+ *
  * 该组件实现了用户评论管理功能，包括：
  * - 展示用户发表的评论列表
  * - 显示评论所属的小说和时间
@@ -81,9 +73,9 @@ const loadMyComments = async () => {
  * 删除评论
  * @param {number} commentId - 评论ID
  */
-const deleteComment = async (commentId) => {
+const deleteComment = async commentId => {
   if (!confirm('确定要删除这条评论吗？')) return
-  
+
   try {
     const response = await commentApi.deleteComment(commentId)
     if (response.code === 200) {
@@ -98,15 +90,15 @@ const deleteComment = async (commentId) => {
   }
 }
 
-const formatTime = (dateString) => {
+const formatTime = dateString => {
   const date = new Date(dateString)
   const now = new Date()
   const diff = now - date
-  
+
   const minute = 60 * 1000
   const hour = 60 * minute
   const day = 24 * hour
-  
+
   if (diff < minute) {
     return '刚刚'
   } else if (diff < hour) {
@@ -135,7 +127,8 @@ h1 {
   color: #333;
 }
 
-.loading, .empty {
+.loading,
+.empty {
   text-align: center;
   padding: 60px 20px;
   color: #999;
@@ -163,7 +156,7 @@ h1 {
 
 .novel-title {
   font-weight: bold;
-  color: #409EFF;
+  color: #409eff;
 }
 
 .comment-time {

@@ -1,7 +1,7 @@
 <script setup>
 /**
  * Profile.vue - 用户个人中心页面组件
- * 
+ *
  * 该组件实现了用户个人中心功能，包括：
  * - 用户信息展示和编辑
  * - 密码修改
@@ -55,7 +55,7 @@ onMounted(() => {
     user.value.email = userStore.userInfo.email || ''
     user.value.avatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${userStore.userInfo.username}`
   }
-  
+
   loadReadingHistory()
   loadBookshelf()
   loadMyComments()
@@ -208,16 +208,16 @@ const saveProfile = () => {
     ElMessage.warning('用户名不能为空')
     return
   }
-  
+
   user.value.username = editForm.value.username
   user.value.email = editForm.value.email
   user.value.avatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${editForm.value.username}`
-  
+
   if (userStore.userInfo) {
     userStore.userInfo.username = editForm.value.username
     userStore.userInfo.email = editForm.value.email
   }
-  
+
   if (passwordForm.value.newPassword) {
     if (passwordForm.value.newPassword !== passwordForm.value.confirmPassword) {
       ElMessage.error('两次输入的密码不一致')
@@ -229,7 +229,7 @@ const saveProfile = () => {
     }
     ElMessage.success('密码修改成功')
   }
-  
+
   ElMessage.success('个人信息更新成功')
   isEditing.value = false
 }
@@ -269,7 +269,7 @@ const logout = () => {
         </div>
       </div>
     </div>
-    
+
     <div class="profile-content">
       <div class="quick-links">
         <div class="quick-link-item" @click="goToHistory">
@@ -283,11 +283,17 @@ const logout = () => {
             <h3>阅读历史</h3>
             <p>{{ actualHistoryCount }} 本</p>
           </div>
-          <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg
+            class="arrow-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
             <polyline points="9 18 15 12 9 6"></polyline>
           </svg>
         </div>
-        
+
         <div class="quick-link-item" @click="goToBookshelf">
           <div class="quick-link-icon bookshelf">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -299,11 +305,17 @@ const logout = () => {
             <h3>我的书架</h3>
             <p>{{ actualBookshelfCount }} 本</p>
           </div>
-          <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg
+            class="arrow-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
             <polyline points="9 18 15 12 9 6"></polyline>
           </svg>
         </div>
-        
+
         <div class="quick-link-item" @click="goToComments">
           <div class="quick-link-icon comments">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -314,11 +326,17 @@ const logout = () => {
             <h3>我的评论</h3>
             <p>{{ myCommentsCount }} 条</p>
           </div>
-          <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg
+            class="arrow-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
             <polyline points="9 18 15 12 9 6"></polyline>
           </svg>
         </div>
-        
+
         <div class="quick-link-item" @click="goToBooklists">
           <div class="quick-link-icon booklists">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -334,26 +352,40 @@ const logout = () => {
             <h3>我的书单</h3>
             <p>{{ myBooklistsCount }} 个</p>
           </div>
-          <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg
+            class="arrow-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
             <polyline points="9 18 15 12 9 6"></polyline>
           </svg>
         </div>
-        
+
         <div class="quick-link-item" @click="goToTopics">
           <div class="quick-link-icon topics">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+              <path
+                d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
+              ></path>
             </svg>
           </div>
           <div class="quick-link-info">
             <h3>我的话题</h3>
             <p>{{ myTopicsCount }} 个</p>
           </div>
-          <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg
+            class="arrow-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
             <polyline points="9 18 15 12 9 6"></polyline>
           </svg>
         </div>
-        
+
         <div class="quick-link-item logout" @click.stop="logout">
           <div class="quick-link-icon logout-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -366,7 +398,13 @@ const logout = () => {
             <h3>退出登录</h3>
             <p>退出当前账户</p>
           </div>
-          <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg
+            class="arrow-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
             <polyline points="9 18 15 12 9 6"></polyline>
           </svg>
         </div>
@@ -389,27 +427,39 @@ const logout = () => {
             <h3>基本信息</h3>
             <div class="form-group">
               <label>用户名</label>
-              <input type="text" v-model="editForm.username" placeholder="请输入用户名" />
+              <input v-model="editForm.username" type="text" placeholder="请输入用户名" />
             </div>
             <div class="form-group">
               <label>邮箱</label>
-              <input type="email" v-model="editForm.email" placeholder="请输入邮箱" />
+              <input v-model="editForm.email" type="email" placeholder="请输入邮箱" />
             </div>
           </div>
-          
+
           <div class="form-section">
             <h3>修改密码</h3>
             <div class="form-group">
               <label>原密码</label>
-              <input type="password" v-model="passwordForm.oldPassword" placeholder="请输入原密码" />
+              <input
+                v-model="passwordForm.oldPassword"
+                type="password"
+                placeholder="请输入原密码"
+              />
             </div>
             <div class="form-group">
               <label>新密码</label>
-              <input type="password" v-model="passwordForm.newPassword" placeholder="请输入新密码（留空则不修改）" />
+              <input
+                v-model="passwordForm.newPassword"
+                type="password"
+                placeholder="请输入新密码（留空则不修改）"
+              />
             </div>
             <div class="form-group">
               <label>确认新密码</label>
-              <input type="password" v-model="passwordForm.confirmPassword" placeholder="请再次输入新密码" />
+              <input
+                v-model="passwordForm.confirmPassword"
+                type="password"
+                placeholder="请再次输入新密码"
+              />
             </div>
           </div>
         </div>
@@ -657,8 +707,12 @@ const logout = () => {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .edit-dialog {

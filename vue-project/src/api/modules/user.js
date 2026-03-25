@@ -6,12 +6,12 @@ export const authApi = {
   login(data) {
     return request.post('/auth/login', data)
   },
-  
+
   // 注册
   register(data) {
     return request.post('/auth/register', data)
   },
-  
+
   // 获取当前用户信息
   getCurrentUser() {
     return request.get('/auth/me')
@@ -24,12 +24,12 @@ export const userApi = {
   getUserInfo(userId) {
     return request.get(`/users/${userId}`)
   },
-  
+
   // 更新用户信息
   updateUserInfo(userId, data) {
     return request.put(`/users/${userId}`, data)
   },
-  
+
   // 修改密码
   changePassword(data) {
     return request.post('/users/change-password', data)
@@ -42,12 +42,12 @@ export const userActionApi = {
   recordAction(data) {
     return request.post('/actions', data)
   },
-  
+
   // 获取用户行为历史
   getUserActions(userId) {
     return request.get(`/actions/user/${userId}`)
   },
-  
+
   // 获取小说行为记录
   getNovelActions(novelId) {
     return request.get(`/actions/novel/${novelId}`)

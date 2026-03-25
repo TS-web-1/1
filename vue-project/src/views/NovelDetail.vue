@@ -1,7 +1,7 @@
 <script setup>
 /**
  * NovelDetail.vue - 小说详情页面组件
- * 
+ *
  * 该组件实现了小说详情展示功能，包括：
  * - 小说基本信息展示（封面、标题、作者、分类、简介等）
  * - 章节列表分页显示
@@ -47,12 +47,12 @@ const fetchNovelDetail = async () => {
       window.scrollTo(0, 0)
     } else {
       console.error('API 返回错误:', response)
-      ElMessage.error('获取小说详情失败：' + (response.message || '未知错误'))
+      ElMessage.error(`获取小说详情失败：${response.message || '未知错误'}`)
       novel.value = null
     }
   } catch (error) {
     console.error('获取小说详情失败:', error)
-    ElMessage.error('获取小说详情失败: ' + error.message)
+    ElMessage.error(`获取小说详情失败: ${error.message}`)
     novel.value = null
   } finally {
     loading.value = false
@@ -76,7 +76,7 @@ const fetchChapters = async (page = 1) => {
       seen.add(key)
       return true
     })
-    
+
     total.value = uniqueChapters.length
     const start = (page - 1) * pageSize.value
     const end = start + pageSize.value
@@ -98,7 +98,7 @@ const fetchChapters = async (page = 1) => {
 const checkBookshelf = async () => {
   const token = localStorage.getItem('token')
   if (!token) return
-  
+
   try {
     const response = await bookmarkApi.getBookmarks()
     isInBookshelf.value = response.data.some(b => b.novel?.id == novelId.value)
@@ -118,19 +118,23 @@ const handleStartReading = async () => {
     router.push('/login')
     return
   }
-  
+
   if (chapters.value && chapters.value.length > 0) {
     let targetChapterId = chapters.value[0].id
-    
+
     try {
       const progressResponse = await readingApi.getReadingProgress(parseInt(novelId.value))
-      if (progressResponse.code === 200 && progressResponse.data && progressResponse.data.chapterId) {
+      if (
+        progressResponse.code === 200 &&
+        progressResponse.data &&
+        progressResponse.data.chapterId
+      ) {
         targetChapterId = progressResponse.data.chapterId
       }
     } catch (error) {
       console.log('获取阅读进度失败，将从第一章开始')
     }
-    
+
     router.push(`/novel/${novelId.value}/chapter/${targetChapterId}`)
   } else {
     ElMessage.warning('暂无章节')
@@ -153,35 +157,47 @@ const handleAddToBookshelf = async () => {
       await handleRemoveFromBookshelf()
       return
     }
-    
+
     let chapterId = 1
     try {
       const progressResponse = await readingApi.getReadingProgress(parseInt(novelId.value))
-      if (progressResponse.code === 200 && progressResponse.data && progressResponse.data.chapterId) {
+      if (
+        progressResponse.code === 200 &&
+        progressResponse.data &&
+        progressResponse.data.chapterId
+      ) {
         chapterId = progressResponse.data.chapterId
       } else {
         const chaptersResponse = await readingApi.getNovelChapters(parseInt(novelId.value))
-        if (chaptersResponse.code === 200 && chaptersResponse.data && chaptersResponse.data.length > 0) {
+        if (
+          chaptersResponse.code === 200 &&
+          chaptersResponse.data &&
+          chaptersResponse.data.length > 0
+        ) {
           chapterId = chaptersResponse.data[0].id
         }
       }
     } catch (e) {
       try {
         const chaptersResponse = await readingApi.getNovelChapters(parseInt(novelId.value))
-        if (chaptersResponse.code === 200 && chaptersResponse.data && chaptersResponse.data.length > 0) {
+        if (
+          chaptersResponse.code === 200 &&
+          chaptersResponse.data &&
+          chaptersResponse.data.length > 0
+        ) {
           chapterId = chaptersResponse.data[0].id
         }
       } catch (e2) {
         chapterId = 1
       }
     }
-    
+
     const response = await bookmarkApi.addBookmark({
       novelId: parseInt(novelId.value),
-      chapterId: chapterId,
+      chapterId,
       title: novel.value.title
     })
-    
+
     if (response.code === 200) {
       ElMessage.success('已加入书架')
       isInBookshelf.value = true
@@ -221,7 +237,7 @@ const handleRemoveFromBookshelf = async () => {
  * 点击章节跳转到阅读页
  * @param {number} chapterId - 章节ID
  */
-const handleChapterClick = (chapterId) => {
+const handleChapterClick = chapterId => {
   const token = localStorage.getItem('token')
   if (!token) {
     ElMessage.warning('请先登录')
@@ -235,7 +251,7 @@ const handleChapterClick = (chapterId) => {
  * 章节分页切换
  * @param {number} page - 页码
  */
-const handleCurrentChange = (page) => {
+const handleCurrentChange = page => {
   currentPage.value = page
   fetchChapters(page)
 }
@@ -250,10 +266,10 @@ const handleLike = async () => {
     router.push('/login')
     return
   }
-  
+
   if (isLikedLoading.value) return
   isLikedLoading.value = true
-  
+
   try {
     if (hasLiked.value) {
       await novelLikeApi.unlikeNovel(parseInt(novelId.value))
@@ -284,7 +300,7 @@ const handleLike = async () => {
 const checkLikeStatus = async () => {
   const token = localStorage.getItem('token')
   if (!token) return
-  
+
   try {
     const response = await novelLikeApi.checkLike(parseInt(novelId.value))
     if (response.code === 200) {
@@ -309,70 +325,115 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="novel-detail-page" v-if="!loading && novel">
+  <div v-if="!loading && novel" class="novel-detail-page">
     <div class="novel-info-card">
       <div class="novel-cover-wrapper">
-        <img 
-          class="novel-cover" 
-          :src="novel.cover || novel.coverImage ? `/api/novels/${novel.id}/cover` : 'https://via.placeholder.com/280x420'" 
-          :alt="novel.title" 
+        <img
+          class="novel-cover"
+          :src="
+            novel.cover || novel.coverImage
+              ? `/api/novels/${novel.id}/cover`
+              : 'https://via.placeholder.com/280x420'
+          "
+          :alt="novel.title"
         />
         <div class="cover-overlay">
-          <span class="status-badge" :class="{ completed: novel.status === 'COMPLETED' || novel.status === '已完结' }">
+          <span
+            class="status-badge"
+            :class="{ completed: novel.status === 'COMPLETED' || novel.status === '已完结' }"
+          >
             {{ novel.status === 'COMPLETED' || novel.status === '已完结' ? '已完结' : '连载中' }}
           </span>
         </div>
       </div>
-      
+
       <div class="novel-meta">
         <div class="novel-header">
           <h1 class="novel-title">{{ novel.title }}</h1>
           <p class="novel-author">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg
+              class="icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
               <circle cx="12" cy="7" r="4"></circle>
             </svg>
             {{ novel.author }}
           </p>
         </div>
-        
+
         <div class="novel-stats">
           <span class="stat-badge">
-            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg
+              class="icon-sm"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
               <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
             </svg>
             {{ novel.category || '未分类' }}
           </span>
           <span class="stat-badge">
-            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg
+              class="icon-sm"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
               <circle cx="12" cy="12" r="3"></circle>
             </svg>
             {{ novel.views || novel.viewCount || 0 }} 阅读
           </span>
           <span class="stat-badge">
-            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg
+              class="icon-sm"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
             </svg>
             {{ novel.bookmarks || novel.favoriteCount || 0 }} 收藏
           </span>
-          <span 
-            class="stat-badge like-badge" 
-            :class="{ 'liked': hasLiked }"
+          <span
+            class="stat-badge like-badge"
+            :class="{ liked: hasLiked }"
+            style="cursor: pointer"
             @click="handleLike"
-            style="cursor: pointer;"
           >
-            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            <svg
+              class="icon-sm"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+              ></path>
             </svg>
             {{ novel.totalLikes || 0 }} 点赞
           </span>
         </div>
-        
+
         <div class="novel-description-wrapper">
           <h3 class="novel-description-label">
-            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg
+              class="icon-sm"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
               <polyline points="14 2 14 8 20 8"></polyline>
               <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -383,29 +444,47 @@ onMounted(() => {
           </h3>
           <p class="novel-description">{{ novel.description || '暂无简介' }}</p>
         </div>
-        
+
         <div class="novel-actions">
           <button class="btn-start-reading" @click="handleStartReading">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg
+              class="icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <polygon points="5 3 19 12 5 21 5 3"></polygon>
             </svg>
             开始阅读
           </button>
-          <button 
-            class="btn-add-bookshelf" 
+          <button
+            class="btn-add-bookshelf"
             :class="{ 'btn-remove': isInBookshelf }"
             @click="handleAddToBookshelf"
           >
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path v-if="!isInBookshelf" d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
-              <path v-else d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            <svg
+              class="icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                v-if="!isInBookshelf"
+                d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"
+              ></path>
+              <path
+                v-else
+                d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+              ></path>
             </svg>
             {{ isInBookshelf ? '移除书架' : '加入书架' }}
           </button>
         </div>
       </div>
     </div>
-    
+
     <div class="chapters-section">
       <h2 class="chapters-header">
         <svg class="icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -415,11 +494,11 @@ onMounted(() => {
         章节列表
         <span class="chapter-count">共 {{ total }} 章</span>
       </h2>
-      
-      <div class="chapter-grid" v-if="chapters.length > 0">
-        <div 
-          v-for="chapter in chapters" 
-          :key="chapter.id" 
+
+      <div v-if="chapters.length > 0" class="chapter-grid">
+        <div
+          v-for="chapter in chapters"
+          :key="chapter.id"
           class="chapter-item"
           @click="handleChapterClick(chapter.id)"
         >
@@ -428,8 +507,8 @@ onMounted(() => {
         </div>
       </div>
       <p v-else class="no-chapters">暂无章节</p>
-      
-      <div class="pagination-wrapper" v-if="total > pageSize">
+
+      <div v-if="total > pageSize" class="pagination-wrapper">
         <el-pagination
           background
           layout="prev, pager, next"
@@ -440,22 +519,28 @@ onMounted(() => {
         />
       </div>
     </div>
-    
+
     <div class="comments-section">
       <CommentBox :novel-id="novelId" />
     </div>
   </div>
-  
+
   <div v-else-if="loading" class="loading-container">
     <div class="loading-spinner">
       <div class="spinner"></div>
       <p class="loading-text">正在加载小说详情...</p>
     </div>
   </div>
-  
+
   <div v-else-if="!loading && !novel" class="error-page">
     <div class="error-content">
-      <svg class="error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <svg
+        class="error-icon"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
         <circle cx="12" cy="12" r="10"></circle>
         <line x1="12" y1="8" x2="12" y2="12"></line>
         <line x1="12" y1="16" x2="12.01" y2="16"></line>
@@ -807,7 +892,10 @@ onMounted(() => {
   font-weight: 500;
   color: rgba(255, 255, 255, 0.5);
   margin-left: auto;
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
 }
 
 .chapter-grid {
@@ -1053,11 +1141,11 @@ onMounted(() => {
   .novel-detail-page {
     padding: 24px 16px;
   }
-  
+
   .novel-info-card {
     padding: 32px;
   }
-  
+
   .novel-cover {
     width: 220px;
     height: 330px;
@@ -1070,54 +1158,54 @@ onMounted(() => {
     padding: 24px;
     gap: 32px;
   }
-  
+
   .novel-cover-wrapper {
     display: flex;
     justify-content: center;
   }
-  
+
   .novel-cover {
     width: 180px;
     height: 270px;
   }
-  
+
   .novel-title {
     font-size: 28px;
     text-align: center;
   }
-  
+
   .novel-author {
     justify-content: center;
   }
-  
+
   .novel-stats {
     justify-content: center;
   }
-  
+
   .novel-actions {
     flex-direction: column;
   }
-  
+
   .btn-start-reading,
   .btn-add-bookshelf {
     width: 100%;
     justify-content: center;
   }
-  
+
   .chapter-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .chapters-section,
   .comments-section {
     padding: 24px;
   }
-  
+
   .chapters-header {
     font-size: 22px;
     flex-wrap: wrap;
   }
-  
+
   .chapter-count {
     width: 100%;
     margin-left: 0;

@@ -1,7 +1,7 @@
 <script setup>
 /**
  * Register.vue - 用户注册页面组件
- * 
+ *
  * 该组件实现了用户注册功能，包括：
  * - 用户身份选择（普通用户/作家）
  * - 用户名、邮箱、密码输入
@@ -73,20 +73,26 @@ const handleRegister = async () => {
         <h1>加入墨香书阁</h1>
         <p>开启您的阅读之旅</p>
       </div>
-      
-      <form @submit.prevent="handleRegister" class="register-form">
+
+      <form class="register-form" @submit.prevent="handleRegister">
         <div class="user-type-selector">
           <label class="selector-label">选择注册身份</label>
           <div class="type-options">
-            <div 
-              v-for="option in userTypeOptions" 
+            <div
+              v-for="option in userTypeOptions"
               :key="option.value"
               class="type-option"
               :class="{ active: userType === option.value }"
               @click="userType = option.value"
             >
               <div class="type-icon">
-                <svg v-if="option.icon === 'user'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg
+                  v-if="option.icon === 'user'"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                   <circle cx="12" cy="7" r="4"></circle>
                 </svg>
@@ -101,7 +107,7 @@ const handleRegister = async () => {
                 <span class="type-label">{{ option.label }}</span>
                 <span class="type-desc">{{ option.desc }}</span>
               </div>
-              <div class="type-check" v-if="userType === option.value">
+              <div v-if="userType === option.value" class="type-check">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
                   <polyline points="20 6 9 17 4 12"></polyline>
                 </svg>
@@ -109,79 +115,100 @@ const handleRegister = async () => {
             </div>
           </div>
         </div>
-        
+
         <div class="form-group">
           <label for="username">用户名</label>
           <div class="input-wrapper">
-            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg
+              class="input-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
               <circle cx="12" cy="7" r="4"></circle>
             </svg>
-            <input 
-              type="text" 
-              id="username" 
-              v-model="username" 
+            <input
+              id="username"
+              v-model="username"
+              type="text"
               placeholder="请输入用户名"
               required
             />
           </div>
         </div>
-        
+
         <div class="form-group">
           <label for="email">邮箱（可选）</label>
           <div class="input-wrapper">
-            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+            <svg
+              class="input-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
+              ></path>
               <polyline points="22,6 12,13 2,6"></polyline>
             </svg>
-            <input 
-              type="email" 
-              id="email" 
-              v-model="email" 
-              placeholder="请输入邮箱"
-            />
+            <input id="email" v-model="email" type="email" placeholder="请输入邮箱" />
           </div>
         </div>
-        
+
         <div class="form-group">
           <label for="password">密码</label>
           <div class="input-wrapper">
-            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg
+              class="input-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
               <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
             </svg>
-            <input 
-              type="password" 
-              id="password" 
-              v-model="password" 
+            <input
+              id="password"
+              v-model="password"
+              type="password"
               placeholder="请输入密码（至少6位）"
               required
             />
           </div>
         </div>
-        
+
         <div class="form-group">
           <label for="confirmPassword">确认密码</label>
           <div class="input-wrapper">
-            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg
+              class="input-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
               <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
             </svg>
-            <input 
-              type="password" 
-              id="confirmPassword" 
-              v-model="confirmPassword" 
+            <input
+              id="confirmPassword"
+              v-model="confirmPassword"
+              type="password"
               placeholder="请再次输入密码"
               required
             />
           </div>
         </div>
-        
+
         <button type="submit" class="btn-register" :disabled="loading">
           <span v-if="loading" class="loading-spinner"></span>
           {{ loading ? '注册中...' : '立即注册' }}
         </button>
-        
+
         <div class="register-footer">
           <p>已有账号？<RouterLink to="/login">立即登录</RouterLink></p>
         </div>
@@ -211,7 +238,7 @@ const handleRegister = async () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: 
+  background:
     radial-gradient(ellipse at 20% 20%, rgba(201, 169, 98, 0.05) 0%, transparent 50%),
     radial-gradient(ellipse at 80% 80%, rgba(201, 169, 98, 0.03) 0%, transparent 50%);
   pointer-events: none;

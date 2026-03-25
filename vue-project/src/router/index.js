@@ -9,7 +9,7 @@ const userRoutes = [
   {
     path: '/',
     name: 'home',
-    component: () => import('../views/Home.vue'),
+    component: () => import('../views/Home.vue')
   },
   {
     path: '/login',
@@ -20,22 +20,22 @@ const userRoutes = [
   {
     path: '/register',
     name: 'register',
-    component: () => import('../views/Register.vue'),
+    component: () => import('../views/Register.vue')
   },
   {
     path: '/novel/:id',
     name: 'novelDetail',
-    component: () => import('../views/NovelDetail.vue'),
+    component: () => import('../views/NovelDetail.vue')
   },
   {
     path: '/novel/:id/chapter/:chapterId',
     name: 'chapterReader',
-    component: () => import('../views/ChapterReader.vue'),
+    component: () => import('../views/ChapterReader.vue')
   },
   {
     path: '/search',
     name: 'search',
-    component: () => import('../views/Search.vue'),
+    component: () => import('../views/Search.vue')
   },
   {
     path: '/profile',
@@ -58,12 +58,12 @@ const userRoutes = [
   {
     path: '/category/:id',
     name: 'category',
-    component: () => import('../views/Category.vue'),
+    component: () => import('../views/Category.vue')
   },
   {
     path: '/community',
     name: 'community',
-    component: () => import('../views/Community.vue'),
+    component: () => import('../views/Community.vue')
   },
   {
     path: '/my-comments',
@@ -80,7 +80,7 @@ const userRoutes = [
   {
     path: '/booklist/:id',
     name: 'booklistDetail',
-    component: () => import('../views/BooklistDetail.vue'),
+    component: () => import('../views/BooklistDetail.vue')
   },
   {
     path: '/my-topics',
@@ -91,18 +91,18 @@ const userRoutes = [
   {
     path: '/topic/:id',
     name: 'topicDetail',
-    component: () => import('../views/TopicDetail.vue'),
+    component: () => import('../views/TopicDetail.vue')
   },
   {
     path: '/recommendations/:type',
     name: 'recommendationList',
-    component: () => import('../views/RecommendationList.vue'),
+    component: () => import('../views/RecommendationList.vue')
   },
   {
     path: '/:pathMatch(.*)*',
     name: 'notFound',
-    component: () => import('../views/NotFound.vue'),
-  },
+    component: () => import('../views/NotFound.vue')
+  }
 ]
 
 // 作者端路由 - 只允许 AUTHOR 角色
@@ -119,7 +119,7 @@ const authorRoutes = [
   {
     path: '/register',
     name: 'register',
-    component: () => import('../views/Register.vue'),
+    component: () => import('../views/Register.vue')
   },
   {
     path: '/author',
@@ -149,8 +149,8 @@ const authorRoutes = [
   {
     path: '/:pathMatch(.*)*',
     name: 'notFound',
-    component: () => import('../views/NotFound.vue'),
-  },
+    component: () => import('../views/NotFound.vue')
+  }
 ]
 
 // 管理后端路由 - 只允许 ADMIN 角色
@@ -180,13 +180,12 @@ const adminRoutes = [
   {
     path: '/:pathMatch(.*)*',
     name: 'notFound',
-    component: () => import('../views/NotFound.vue'),
-  },
+    component: () => import('../views/NotFound.vue')
+  }
 ]
 
 // 根据应用类型选择路由
-const routes = appType === 'author' ? authorRoutes :
-               appType === 'admin' ? adminRoutes : userRoutes
+const routes = appType === 'author' ? authorRoutes : appType === 'admin' ? adminRoutes : userRoutes
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -199,7 +198,7 @@ const router = createRouter({
       // 否则滚动到顶部
       return { top: 0 }
     }
-  },
+  }
 })
 
 // 路由守卫
@@ -237,7 +236,7 @@ router.beforeEach((to, from, next) => {
       return
     }
   }
-  
+
   // 如果已退出登录（没有 token），但有 userRole，清除 userRole
   if (!token && userRole) {
     localStorage.removeItem('userRole')

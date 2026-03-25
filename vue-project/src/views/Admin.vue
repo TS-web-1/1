@@ -6,17 +6,15 @@
         <p class="admin-username">{{ adminUsername }}</p>
       </div>
       <nav class="sidebar-nav">
-        <a 
-          v-for="item in navItems" 
+        <a
+          v-for="item in navItems"
           :key="item.key"
           :class="['nav-item', { active: activeSection === item.key }]"
           @click="activeSection = item.key"
         >
           {{ item.label }}
         </a>
-        <a class="nav-item logout" @click="logout">
-          退出登录
-        </a>
+        <a class="nav-item logout" @click="logout"> 退出登录 </a>
       </nav>
     </div>
 
@@ -60,7 +58,10 @@
             <div v-for="trend in trends" :key="trend.genre" class="trend-item">
               <span class="trend-name">{{ trend.genre }}</span>
               <div class="trend-bar">
-                <div class="trend-fill" :style="{ width: calculatePercent(trend.count) + '%' }"></div>
+                <div
+                  class="trend-fill"
+                  :style="{ width: calculatePercent(trend.count) + '%' }"
+                ></div>
               </div>
               <span class="trend-count">{{ trend.count }} 本</span>
             </div>
@@ -73,7 +74,7 @@
           <h2>章节审核</h2>
           <button class="btn-refresh" @click="loadChapters()">刷新</button>
         </div>
-        
+
         <div class="chapters-table">
           <table>
             <thead>
@@ -109,8 +110,8 @@
         </div>
 
         <div class="pagination">
-          <button 
-            class="page-btn" 
+          <button
+            class="page-btn"
             :disabled="pendingChaptersPage === 0"
             @click="loadChapters(pendingChaptersPage - 1)"
           >
@@ -118,19 +119,19 @@
           </button>
           <span class="page-info">
             第
-            <input 
-              type="number" 
-              v-model.number="jumpToPage" 
-              @keyup.enter="jumpToPageFunc('pending')"
-              :min="1" 
+            <input
+              v-model.number="jumpToPage"
+              type="number"
+              :min="1"
               :max="pendingChaptersTotalPages"
               class="page-input"
-            /> 
+              @keyup.enter="jumpToPageFunc('pending')"
+            />
             / {{ pendingChaptersTotalPages }} 页
-            <button @click="jumpToPageFunc('pending')" class="jump-btn">跳转</button>
+            <button class="jump-btn" @click="jumpToPageFunc('pending')">跳转</button>
           </span>
-          <button 
-            class="page-btn" 
+          <button
+            class="page-btn"
             :disabled="pendingChaptersPage === pendingChaptersTotalPages - 1"
             @click="loadChapters(pendingChaptersPage + 1)"
           >
@@ -143,7 +144,11 @@
         <div class="section-header">
           <h2>小说管理</h2>
           <div class="filter-bar">
-            <input v-model="novelManageSearch" placeholder="搜索小说..." @keyup.enter="loadAllNovels(0)" />
+            <input
+              v-model="novelManageSearch"
+              placeholder="搜索小说..."
+              @keyup.enter="loadAllNovels(0)"
+            />
             <select v-model="novelManageFilter" @change="loadAllNovels(0)">
               <option value="all">全部状态</option>
               <option value="APPROVED">已通过</option>
@@ -177,20 +182,55 @@
                 <td>{{ novel.wordCount || 0 }}</td>
                 <td>
                   <span :class="['status-badge', novel.reviewStatus?.toLowerCase()]">
-                    {{ novel.reviewStatus === 'APPROVED' ? '已通过' : novel.reviewStatus === 'PENDING' ? '待审核' : '已拒绝' }}
+                    {{
+                      novel.reviewStatus === 'APPROVED'
+                        ? '已通过'
+                        : novel.reviewStatus === 'PENDING'
+                          ? '待审核'
+                          : '已拒绝'
+                    }}
                   </span>
                 </td>
                 <td>
-                  <span :class="['status-badge', novel.status === 'ONGOING' ? 'ongoing' : novel.status === 'COMPLETED' ? 'completed' : 'normal']">
-                    {{ novel.status === 'ONGOING' ? '连载中' : novel.status === 'COMPLETED' ? '已完结' : novel.status === 'BANNED' ? '已封禁' : '未知' }}
+                  <span
+                    :class="[
+                      'status-badge',
+                      novel.status === 'ONGOING'
+                        ? 'ongoing'
+                        : novel.status === 'COMPLETED'
+                          ? 'completed'
+                          : 'normal'
+                    ]"
+                  >
+                    {{
+                      novel.status === 'ONGOING'
+                        ? '连载中'
+                        : novel.status === 'COMPLETED'
+                          ? '已完结'
+                          : novel.status === 'BANNED'
+                            ? '已封禁'
+                            : '未知'
+                    }}
                   </span>
                 </td>
                 <td>
                   <div class="action-btns">
                     <button class="btn-view" @click="viewNovel(novel.id)">查看</button>
-                    <button class="btn-status" @click="showNovelStatusModal(novel)">修改状态</button>
-                    <button v-if="novel.status !== 'BANNED'" class="btn-ban" @click="banNovel(novel.id)">封禁</button>
-                    <button v-if="novel.status === 'BANNED'" class="btn-unban" @click="unbanNovel(novel.id)">解禁</button>
+                    <button class="btn-status" @click="showNovelStatusModal(novel)"
+                      >修改状态</button
+                    >
+                    <button
+                      v-if="novel.status !== 'BANNED'"
+                      class="btn-ban"
+                      @click="banNovel(novel.id)"
+                      >封禁</button
+                    >
+                    <button
+                      v-if="novel.status === 'BANNED'"
+                      class="btn-unban"
+                      @click="unbanNovel(novel.id)"
+                      >解禁</button
+                    >
                     <button class="btn-delete" @click="deleteNovel(novel.id)">删除</button>
                   </div>
                 </td>
@@ -201,8 +241,8 @@
         </div>
 
         <div class="pagination">
-          <button 
-            class="page-btn" 
+          <button
+            class="page-btn"
             :disabled="novelsPage === 0"
             @click="loadAllNovels(novelsPage - 1)"
           >
@@ -210,19 +250,19 @@
           </button>
           <span class="page-info">
             第
-            <input 
-              type="number" 
-              v-model.number="jumpToPage" 
-              @keyup.enter="jumpToPageFunc('novel')"
-              :min="1" 
+            <input
+              v-model.number="jumpToPage"
+              type="number"
+              :min="1"
               :max="novelsTotalPages"
               class="page-input"
-            /> 
+              @keyup.enter="jumpToPageFunc('novel')"
+            />
             / {{ novelsTotalPages }} 页
-            <button @click="jumpToPageFunc('novel')" class="jump-btn">跳转</button>
+            <button class="jump-btn" @click="jumpToPageFunc('novel')">跳转</button>
           </span>
-          <button 
-            class="page-btn" 
+          <button
+            class="page-btn"
             :disabled="novelsPage === novelsTotalPages - 1"
             @click="loadAllNovels(novelsPage + 1)"
           >
@@ -256,17 +296,12 @@
         </div>
 
         <div v-if="categoryTotalPages > 1" class="pagination">
-          <button 
-            :disabled="categoryPage === 0" 
-            @click="loadCategories(categoryPage - 1)"
-          >
+          <button :disabled="categoryPage === 0" @click="loadCategories(categoryPage - 1)">
             上一页
           </button>
-          <span class="page-info">
-            第 {{ categoryPage + 1 }} / {{ categoryTotalPages }} 页
-          </span>
-          <button 
-            :disabled="categoryPage >= categoryTotalPages - 1" 
+          <span class="page-info"> 第 {{ categoryPage + 1 }} / {{ categoryTotalPages }} 页 </span>
+          <button
+            :disabled="categoryPage >= categoryTotalPages - 1"
             @click="loadCategories(categoryPage + 1)"
           >
             下一页
@@ -315,23 +350,13 @@
                 </td>
                 <td>
                   <div class="action-btns">
-                    <button 
-                      v-if="!user.isBanned" 
-                      class="btn-ban" 
-                      @click="banUser(user.id)"
-                    >
+                    <button v-if="!user.isBanned" class="btn-ban" @click="banUser(user.id)">
                       封禁
                     </button>
-                    <button 
-                      v-else 
-                      class="btn-unban" 
-                      @click="unbanUser(user.id)"
-                    >
-                      解禁
-                    </button>
-                    <button 
-                      v-if="user.role !== 'ADMIN'" 
-                      class="btn-delete" 
+                    <button v-else class="btn-unban" @click="unbanUser(user.id)"> 解禁 </button>
+                    <button
+                      v-if="user.role !== 'ADMIN'"
+                      class="btn-delete"
                       @click="deleteUser(user.id)"
                     >
                       删除
@@ -345,28 +370,24 @@
         </div>
 
         <div class="pagination">
-          <button 
-            class="page-btn" 
-            :disabled="usersPage === 0"
-            @click="loadUsers(usersPage - 1)"
-          >
+          <button class="page-btn" :disabled="usersPage === 0" @click="loadUsers(usersPage - 1)">
             上一页
           </button>
           <span class="page-info">
             第
-            <input 
-              type="number" 
-              v-model.number="jumpToPage" 
-              @keyup.enter="jumpToPageFunc('users')"
-              :min="1" 
+            <input
+              v-model.number="jumpToPage"
+              type="number"
+              :min="1"
               :max="usersTotalPages"
               class="page-input"
-            /> 
+              @keyup.enter="jumpToPageFunc('users')"
+            />
             / {{ usersTotalPages }} 页
-            <button @click="jumpToPageFunc('users')" class="jump-btn">跳转</button>
+            <button class="jump-btn" @click="jumpToPageFunc('users')">跳转</button>
           </span>
-          <button 
-            class="page-btn" 
+          <button
+            class="page-btn"
             :disabled="usersPage === usersTotalPages - 1"
             @click="loadUsers(usersPage + 1)"
           >
@@ -408,9 +429,7 @@
       <div v-if="activeSection === 'comments'" class="comments-section">
         <div class="section-header">
           <h2>评论管理</h2>
-          <div class="pagination-info">
-            共 {{ commentsTotal }} 条评论
-          </div>
+          <div class="pagination-info"> 共 {{ commentsTotal }} 条评论 </div>
         </div>
 
         <div class="comments-list">
@@ -429,8 +448,8 @@
         </div>
 
         <div class="pagination">
-          <button 
-            class="page-btn" 
+          <button
+            class="page-btn"
             :disabled="commentsPage === 0"
             @click="loadComments(commentsPage - 1)"
           >
@@ -438,19 +457,19 @@
           </button>
           <span class="page-info">
             第
-            <input 
-              type="number" 
-              v-model.number="jumpToPage" 
-              @keyup.enter="jumpToPageFunc('comments')"
-              :min="1" 
+            <input
+              v-model.number="jumpToPage"
+              type="number"
+              :min="1"
               :max="commentsTotalPages"
               class="page-input"
-            /> 
+              @keyup.enter="jumpToPageFunc('comments')"
+            />
             / {{ commentsTotalPages }} 页
-            <button @click="jumpToPageFunc('comments')" class="jump-btn">跳转</button>
+            <button class="jump-btn" @click="jumpToPageFunc('comments')">跳转</button>
           </span>
-          <button 
-            class="page-btn" 
+          <button
+            class="page-btn"
             :disabled="commentsPage === commentsTotalPages - 1"
             @click="loadComments(commentsPage + 1)"
           >
@@ -462,9 +481,7 @@
       <div v-if="activeSection === 'topics'" class="topics-section">
         <div class="section-header">
           <h2>话题管理</h2>
-          <div class="pagination-info">
-            共 {{ topicsTotal }} 个话题
-          </div>
+          <div class="pagination-info"> 共 {{ topicsTotal }} 个话题 </div>
         </div>
 
         <div class="topics-table">
@@ -500,28 +517,24 @@
         </div>
 
         <div class="pagination">
-          <button 
-            class="page-btn" 
-            :disabled="topicsPage === 0"
-            @click="loadTopics(topicsPage - 1)"
-          >
+          <button class="page-btn" :disabled="topicsPage === 0" @click="loadTopics(topicsPage - 1)">
             上一页
           </button>
           <span class="page-info">
             第
-            <input 
-              type="number" 
-              v-model.number="jumpToPage" 
-              @keyup.enter="jumpToPageFunc('topics')"
-              :min="1" 
+            <input
+              v-model.number="jumpToPage"
+              type="number"
+              :min="1"
               :max="topicsTotalPages"
               class="page-input"
-            /> 
+              @keyup.enter="jumpToPageFunc('topics')"
+            />
             / {{ topicsTotalPages }} 页
-            <button @click="jumpToPageFunc('topics')" class="jump-btn">跳转</button>
+            <button class="jump-btn" @click="jumpToPageFunc('topics')">跳转</button>
           </span>
-          <button 
-            class="page-btn" 
+          <button
+            class="page-btn"
             :disabled="topicsPage === topicsTotalPages - 1"
             @click="loadTopics(topicsPage + 1)"
           >
@@ -533,9 +546,7 @@
       <div v-if="activeSection === 'booklists'" class="booklists-section">
         <div class="section-header">
           <h2>书单管理</h2>
-          <div class="pagination-info">
-            共 {{ booklistsTotal }} 个书单
-          </div>
+          <div class="pagination-info"> 共 {{ booklistsTotal }} 个书单 </div>
         </div>
 
         <div class="booklists-table">
@@ -577,8 +588,8 @@
         </div>
 
         <div class="pagination">
-          <button 
-            class="page-btn" 
+          <button
+            class="page-btn"
             :disabled="booklistsPage === 0"
             @click="loadBooklists(booklistsPage - 1)"
           >
@@ -586,19 +597,19 @@
           </button>
           <span class="page-info">
             第
-            <input 
-              type="number" 
-              v-model.number="jumpToPage" 
-              @keyup.enter="jumpToPageFunc('booklists')"
-              :min="1" 
+            <input
+              v-model.number="jumpToPage"
+              type="number"
+              :min="1"
               :max="booklistsTotalPages"
               class="page-input"
-            /> 
+              @keyup.enter="jumpToPageFunc('booklists')"
+            />
             / {{ booklistsTotalPages }} 页
-            <button @click="jumpToPageFunc('booklists')" class="jump-btn">跳转</button>
+            <button class="jump-btn" @click="jumpToPageFunc('booklists')">跳转</button>
           </span>
-          <button 
-            class="page-btn" 
+          <button
+            class="page-btn"
             :disabled="booklistsPage === booklistsTotalPages - 1"
             @click="loadBooklists(booklistsPage + 1)"
           >
@@ -606,7 +617,6 @@
           </button>
         </div>
       </div>
-
     </div>
 
     <div v-if="showAddCategory" class="modal-overlay" @click.self="closeCategoryModal">
@@ -627,7 +637,9 @@
           </div>
           <div class="form-actions">
             <button type="button" class="cancel-btn" @click="closeCategoryModal">取消</button>
-            <button type="submit" class="submit-btn">{{ editingCategory ? '保存' : '添加' }}</button>
+            <button type="submit" class="submit-btn">{{
+              editingCategory ? '保存' : '添加'
+            }}</button>
           </div>
         </form>
       </div>
@@ -650,7 +662,11 @@
       </div>
     </div>
 
-    <div v-if="showNovelStatusModalFlag" class="modal-overlay" @click.self="showNovelStatusModalFlag = false">
+    <div
+      v-if="showNovelStatusModalFlag"
+      class="modal-overlay"
+      @click.self="showNovelStatusModalFlag = false"
+    >
       <div class="modal-content">
         <div class="modal-header">
           <h2>修改小说状态</h2>
@@ -684,7 +700,7 @@
 <script setup>
 /**
  * Admin.vue - 管理后台主页面组件
- * 
+ *
  * 该组件实现了小说系统的完整管理后台功能，包括：
  * - 数据概览仪表板：显示用户数、小说数、阅读量、评论数等统计数据
  * - 章节审核：审核作者提交的章节内容
@@ -739,7 +755,9 @@ const userSearch = ref('')
 const showAddCategory = ref(false)
 const editingCategory = ref(null)
 const showAddUser = ref(false)
-const adminUsername = ref(JSON.parse(localStorage.getItem('adminUserInfo') || '{}').username || '管理员')
+const adminUsername = ref(
+  JSON.parse(localStorage.getItem('adminUserInfo') || '{}').username || '管理员'
+)
 
 const newUser = ref({
   username: '',
@@ -823,19 +841,19 @@ const checkAdminAuth = () => {
   const token = localStorage.getItem('adminToken')
   const userInfo = JSON.parse(localStorage.getItem('adminUserInfo') || '{}')
   const userRole = (userInfo.role || '').toUpperCase()
-  
+
   if (!token) {
     ElMessage.warning('请先登录')
     router.push('/login')
     return false
   }
-  
+
   if (userRole !== 'ADMIN') {
     ElMessage.warning('当前账号不是管理员，请使用管理员账号登录')
     router.push('/login')
     return false
   }
-  
+
   return true
 }
 
@@ -844,7 +862,7 @@ const checkAdminAuth = () => {
  * @param {string} dateStr - 日期字符串
  * @returns {string} 格式化后的日期
  */
-const formatTime = (dateStr) => {
+const formatTime = dateStr => {
   if (!dateStr) return '-'
   return new Date(dateStr).toLocaleDateString()
 }
@@ -855,7 +873,7 @@ const formatTime = (dateStr) => {
  * @param {number} count - 当前题材的小说数量
  * @returns {number} 百分比值
  */
-const calculatePercent = (count) => {
+const calculatePercent = count => {
   const max = Math.max(...trends.value.map(t => t.count), 1)
   return Math.round((count / max) * 100)
 }
@@ -943,7 +961,7 @@ const loadAllNovels = async (page = 0) => {
  * 封禁小说
  * @param {number} novelId - 小说ID
  */
-const banNovel = async (novelId) => {
+const banNovel = async novelId => {
   try {
     await ElMessageBox.confirm('确定要封禁这本小说吗？', '封禁确认', {
       confirmButtonText: '确定',
@@ -969,7 +987,7 @@ const banNovel = async (novelId) => {
  * 解禁小说
  * @param {number} novelId - 小说ID
  */
-const unbanNovel = async (novelId) => {
+const unbanNovel = async novelId => {
   try {
     const res = await unbanNovelApi(novelId)
     if (res.code === 200) {
@@ -988,7 +1006,7 @@ const unbanNovel = async (novelId) => {
  * 删除小说
  * @param {number} novelId - 小说ID
  */
-const deleteNovel = async (novelId) => {
+const deleteNovel = async novelId => {
   try {
     await ElMessageBox.confirm('确定要删除这本小说吗？此操作不可恢复！', '删除确认', {
       confirmButtonText: '确定',
@@ -1014,7 +1032,7 @@ const deleteNovel = async (novelId) => {
  * 显示小说状态修改弹窗
  * @param {Object} novel - 小说对象
  */
-const showNovelStatusModal = (novel) => {
+const showNovelStatusModal = novel => {
   selectedNovelForStatus.value = novel
   novelStatusForm.value = {
     status: novel.status || 'ONGOING',
@@ -1050,13 +1068,13 @@ const saveNovelStatus = async () => {
  * 跳转到指定页面
  * @param {string} type - 分页类型（pending/novel/category/users/comments/topics/booklists）
  */
-const jumpToPageFunc = async (type) => {
+const jumpToPageFunc = async type => {
   const page = jumpToPage.value - 1
   if (isNaN(page) || page < 0) {
     ElMessage.warning('请输入有效的页码')
     return
   }
-  
+
   try {
     if (type === 'pending') {
       if (page >= pendingChaptersTotalPages.value) {
@@ -1172,7 +1190,7 @@ const loadComments = async (page = 0) => {
  * 在新窗口打开小说页面
  * @param {number} id - 小说ID
  */
-const viewNovel = (id) => {
+const viewNovel = id => {
   window.open(`/novel/${id}`, '_blank')
 }
 
@@ -1180,7 +1198,7 @@ const viewNovel = (id) => {
  * 查看章节详情
  * @param {Object} chapter - 章节对象
  */
-const viewChapter = async (chapter) => {
+const viewChapter = async chapter => {
   try {
     const res = await getChapterDetail(chapter.id)
     if (res.code === 200 && res.data) {
@@ -1199,7 +1217,7 @@ const viewChapter = async (chapter) => {
  * 通过章节审核
  * @param {number} id - 章节ID
  */
-const approveChapter = async (id) => {
+const approveChapter = async id => {
   try {
     const res = await reviewChapter(id, 'APPROVED', '')
     if (res.code === 200) {
@@ -1219,13 +1237,13 @@ const approveChapter = async (id) => {
  * 需要输入拒绝原因
  * @param {number} id - 章节ID
  */
-const rejectChapter = async (id) => {
+const rejectChapter = async id => {
   try {
     const { value: reason } = await ElMessageBox.prompt('请输入拒绝原因', '拒绝章节', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
       inputPlaceholder: '请输入拒绝原因',
-      inputValidator: (value) => {
+      inputValidator: value => {
         if (!value || value.trim() === '') {
           return '请输入拒绝原因'
         }
@@ -1253,7 +1271,7 @@ const rejectChapter = async (id) => {
  * 编辑分类
  * @param {Object} cat - 分类对象
  */
-const editCategory = (cat) => {
+const editCategory = cat => {
   editingCategory.value = cat
   categoryForm.value = {
     name: cat.name,
@@ -1303,7 +1321,7 @@ const saveCategory = async () => {
  * 删除分类
  * @param {number} id - 分类ID
  */
-const deleteCategory = async (id) => {
+const deleteCategory = async id => {
   if (!confirm('确定要删除这个分类吗？')) return
   try {
     const res = await apiDeleteCategory(id)
@@ -1339,7 +1357,7 @@ const searchUsers = async () => {
  * 封禁用户
  * @param {number} id - 用户ID
  */
-const banUser = async (id) => {
+const banUser = async id => {
   if (!confirm('确定要封禁这个用户吗？')) return
   try {
     const res = await apiBanUser(id)
@@ -1357,7 +1375,7 @@ const banUser = async (id) => {
  * 解禁用户
  * @param {number} id - 用户ID
  */
-const unbanUser = async (id) => {
+const unbanUser = async id => {
   try {
     const res = await apiUnbanUser(id)
     if (res.code === 200) {
@@ -1374,14 +1392,14 @@ const unbanUser = async (id) => {
  * 删除用户
  * @param {number} id - 用户ID
  */
-const deleteUser = async (id) => {
+const deleteUser = async id => {
   try {
     await ElMessageBox.confirm('确定要删除这个用户吗？', '删除确认', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
       type: 'warning'
     })
-    
+
     const res = await apiDeleteUser(id)
     if (res.code === 200) {
       ElMessage.success('删除成功')
@@ -1425,7 +1443,7 @@ const addUser = async () => {
  * 删除评论
  * @param {number} id - 评论ID
  */
-const deleteComment = async (id) => {
+const deleteComment = async id => {
   if (!confirm('确定要删除这条评论吗？')) return
   try {
     const res = await apiDeleteComment(id)
@@ -1462,14 +1480,14 @@ const loadTopics = async (page = 0) => {
  * 删除话题
  * @param {number} id - 话题ID
  */
-const deleteTopic = async (id) => {
+const deleteTopic = async id => {
   try {
     await ElMessageBox.confirm('确定要删除这个话题吗？', '删除确认', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
       type: 'warning'
     })
-    
+
     const res = await apiDeleteTopic(id)
     if (res.code === 200) {
       ElMessage.success('删除成功')
@@ -1507,14 +1525,14 @@ const loadBooklists = async (page = 0) => {
  * 删除书单
  * @param {number} id - 书单ID
  */
-const deleteBooklist = async (id) => {
+const deleteBooklist = async id => {
   try {
     await ElMessageBox.confirm('确定要删除这个书单吗？', '删除确认', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
       type: 'warning'
     })
-    
+
     const res = await apiDeleteBooklist(id)
     if (res.code === 200) {
       ElMessage.success('删除成功')
@@ -1543,7 +1561,7 @@ const logout = () => {
  * 监听侧边栏导航切换
  * 根据选中的菜单项加载对应数据
  */
-watch(activeSection, (newSection) => {
+watch(activeSection, newSection => {
   if (newSection === 'chapters') {
     loadChapters()
   } else if (newSection === 'novelManage') {
@@ -1705,16 +1723,16 @@ onMounted(() => {
   box-shadow: var(--shadow-md);
 }
 
-.stat-icon.users { 
+.stat-icon.users {
   background: linear-gradient(135deg, #e6f7ff 0%, #bae7ff 100%);
 }
-.stat-icon.novels { 
+.stat-icon.novels {
   background: linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%);
 }
-.stat-icon.views { 
+.stat-icon.views {
   background: linear-gradient(135deg, #fff7e6 0%, #ffe7ba 100%);
 }
-.stat-icon.comments { 
+.stat-icon.comments {
   background: linear-gradient(135deg, #fff1f0 0%, #ffccc7 100%);
 }
 
@@ -1918,7 +1936,8 @@ table {
   border-collapse: collapse;
 }
 
-th, td {
+th,
+td {
   padding: var(--spacing-md);
   text-align: left;
   border-bottom: 1px solid var(--color-border);

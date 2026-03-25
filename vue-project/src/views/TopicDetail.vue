@@ -1,12 +1,12 @@
 <template>
   <div class="topic-detail">
     <div v-if="loading" class="loading">加载中...</div>
-    
+
     <div v-else-if="!topic" class="empty">
       <p>话题不存在</p>
-      <button @click="goBack" class="back-btn">返回</button>
+      <button class="back-btn" @click="goBack">返回</button>
     </div>
-    
+
     <div v-else class="topic-container">
       <div class="topic-header">
         <h1>{{ topic.title }}</h1>
@@ -16,11 +16,11 @@
           <span class="views">浏览 {{ topic.viewCount || 0 }}</span>
         </div>
       </div>
-      
+
       <div class="topic-content">
         <p>{{ topic.content }}</p>
       </div>
-      
+
       <div class="topic-stats">
         <span class="stat-item">
           <el-icon><View /></el-icon>
@@ -35,9 +35,9 @@
           {{ topic.likeCount || 0 }}
         </span>
       </div>
-      
+
       <div class="back-link">
-        <button @click="goBack" class="back-btn">返回话题列表</button>
+        <button class="back-btn" @click="goBack">返回话题列表</button>
       </div>
     </div>
   </div>
@@ -46,7 +46,7 @@
 <script setup>
 /**
  * TopicDetail.vue - 话题详情页面组件
- * 
+ *
  * 该组件实现了话题详情展示功能，包括：
  * - 话题标题、内容、作者信息展示
  * - 浏览量、评论数、点赞数统计
@@ -98,19 +98,19 @@ const goBack = () => {
   router.back()
 }
 
-const formatTime = (dateString) => {
+const formatTime = dateString => {
   const date = new Date(dateString)
   const now = new Date()
   const diff = now - date
-  
+
   const minutes = Math.floor(diff / 60000)
   const hours = Math.floor(diff / 3600000)
   const days = Math.floor(diff / 86400000)
-  
+
   if (minutes < 60) return `${minutes}分钟前`
   if (hours < 24) return `${hours}小时前`
   if (days < 30) return `${days}天前`
-  
+
   return date.toLocaleDateString()
 }
 </script>
@@ -122,7 +122,8 @@ const formatTime = (dateString) => {
   padding: 20px;
 }
 
-.loading, .empty {
+.loading,
+.empty {
   text-align: center;
   padding: 60px 20px;
   color: #999;
@@ -131,7 +132,7 @@ const formatTime = (dateString) => {
 .back-btn {
   margin-top: 20px;
   padding: 10px 30px;
-  background-color: #409EFF;
+  background-color: #409eff;
   color: white;
   border: none;
   border-radius: 4px;

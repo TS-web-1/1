@@ -1,7 +1,7 @@
 <script setup>
 /**
  * AuthorChapterManage.vue - 作者章节管理页面组件
- * 
+ *
  * 该组件实现了作者对作品章节的管理功能，包括：
  * - 章节列表展示
  * - 创建新章节
@@ -73,9 +73,19 @@ const loadChapters = async () => {
  * @param {number} num - 章节序号
  * @returns {string} 章节标题
  */
-const getChapterTitle = (num) => {
-  const titles = ['初入江湖', '意外收获', '突破瓶颈', '强敌来袭', '生死一战', 
-                  '奇遇连连', '师傅教诲', '下山历练', '结识好友', '共闯难关']
+const getChapterTitle = num => {
+  const titles = [
+    '初入江湖',
+    '意外收获',
+    '突破瓶颈',
+    '强敌来袭',
+    '生死一战',
+    '奇遇连连',
+    '师傅教诲',
+    '下山历练',
+    '结识好友',
+    '共闯难关'
+  ]
   return titles[num % titles.length] || '新的篇章'
 }
 
@@ -96,7 +106,7 @@ const createChapter = () => {
  * 编辑章节
  * @param {Object} chapter - 章节对象
  */
-const editChapter = (chapter) => {
+const editChapter = chapter => {
   editingChapter.value = chapter
   editForm.value = {
     title: chapter.title.replace(`第${chapter.chapterNumber}章 `, ''),
@@ -121,9 +131,10 @@ const saveChapter = async () => {
     }
 
     // 如果是被退回修改的章节（PENDING且有审核意见），重新提交审核
-    const isResubmit = editingChapter.value && 
-                       editingChapter.value.reviewStatus === 'PENDING' && 
-                       editingChapter.value.reviewComment
+    const isResubmit =
+      editingChapter.value &&
+      editingChapter.value.reviewStatus === 'PENDING' &&
+      editingChapter.value.reviewComment
 
     if (editingChapter.value) {
       // 更新现有章节
@@ -157,14 +168,14 @@ const saveChapter = async () => {
 }
 
 // 删除章节
-const deleteChapter = async (chapter) => {
+const deleteChapter = async chapter => {
   try {
     await ElMessageBox.confirm(`确定要删除"${chapter.title}"吗？`, '警告', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
       type: 'warning'
     })
-    
+
     const response = await authorApi.deleteChapter(chapter.id)
     if (response.code === 200) {
       ElMessage.success('章节已删除')
@@ -184,11 +195,15 @@ const deleteChapter = async (chapter) => {
 const moveChapter = (chapter, direction) => {
   const index = chapters.value.findIndex(c => c.id === chapter.id)
   if (direction === 'up' && index > 0) {
-    [chapters.value[index], chapters.value[index - 1]] = 
-    [chapters.value[index - 1], chapters.value[index]]
+    ;[chapters.value[index], chapters.value[index - 1]] = [
+      chapters.value[index - 1],
+      chapters.value[index]
+    ]
   } else if (direction === 'down' && index < chapters.value.length - 1) {
-    [chapters.value[index], chapters.value[index + 1]] = 
-    [chapters.value[index + 1], chapters.value[index]]
+    ;[chapters.value[index], chapters.value[index + 1]] = [
+      chapters.value[index + 1],
+      chapters.value[index]
+    ]
   }
   // 重新编号
   chapters.value.forEach((c, i) => {
@@ -202,15 +217,15 @@ const saveToDraft = async () => {
     ElMessage.warning('请输入标题或内容后再保存')
     return
   }
-  
+
   try {
     const draftData = {
-      novelId: novelId,
+      novelId,
       title: editForm.value.title || `第${chapters.value.length + 1}章`,
       content: editForm.value.content,
       wordCount: editForm.value.content.length
     }
-    
+
     const response = await authorApi.saveDraft(draftData)
     if (response.code === 200) {
       ElMessage.success('已保存到草稿箱')
@@ -239,7 +254,7 @@ const wordCount = computed(() => {
 })
 
 // 格式化时间
-const formatTime = (date) => {
+const formatTime = date => {
   return new Date(date).toLocaleDateString()
 }
 
@@ -247,12 +262,12 @@ onMounted(() => {
   loadNovelInfo()
   loadChapters()
   startAutoSave()
-  
+
   // 检查是否有从草稿跳转过来的参数
   const draftId = route.query.draftId
   const draftTitle = route.query.draftTitle
   const draftContent = route.query.draftContent
-  
+
   if (draftId) {
     // 从草稿跳转过来，自动打开编辑框并填充内容
     editingChapter.value = null
@@ -260,7 +275,7 @@ onMounted(() => {
       title: draftTitle || '',
       content: draftContent || '',
       isPublish: true,
-      draftId: draftId // 保存草稿ID，发布后可以删除草稿
+      draftId // 保存草稿ID，发布后可以删除草稿
     }
     showEditModal.value = true
     ElMessage.info('已加载草稿内容')
@@ -296,17 +311,37 @@ onMounted(() => {
             <span>{{ formatTime(chapter.createdAt) }}</span>
             <span v-if="chapter.isVip" class="vip-badge">VIP</span>
             <span :class="['review-status', chapter.reviewStatus?.toLowerCase()]">
-              {{ chapter.reviewStatus === 'PENDING' ? (chapter.reviewComment ? '需修改' : '审核中') : chapter.reviewStatus === 'APPROVED' ? '已通过' : '未通过' }}
+              {{
+                chapter.reviewStatus === 'PENDING'
+                  ? chapter.reviewComment
+                    ? '需修改'
+                    : '审核中'
+                  : chapter.reviewStatus === 'APPROVED'
+                    ? '已通过'
+                    : '未通过'
+              }}
             </span>
           </div>
           <div v-if="chapter.reviewComment" class="review-comment">
-            <span class="comment-label">{{ chapter.reviewStatus === 'PENDING' ? '修改意见：' : '未通过原因：' }}</span>
+            <span class="comment-label">{{
+              chapter.reviewStatus === 'PENDING' ? '修改意见：' : '未通过原因：'
+            }}</span>
             <span class="comment-content">{{ chapter.reviewComment }}</span>
           </div>
         </div>
         <div class="chapter-actions">
-          <button class="action-btn" @click="moveChapter(chapter, 'up')" :disabled="chapter.chapterNumber === 1">↑</button>
-          <button class="action-btn" @click="moveChapter(chapter, 'down')" :disabled="chapter.chapterNumber === chapters.length">↓</button>
+          <button
+            class="action-btn"
+            :disabled="chapter.chapterNumber === 1"
+            @click="moveChapter(chapter, 'up')"
+            >↑</button
+          >
+          <button
+            class="action-btn"
+            :disabled="chapter.chapterNumber === chapters.length"
+            @click="moveChapter(chapter, 'down')"
+            >↓</button
+          >
           <button class="action-btn primary" @click="editChapter(chapter)">编辑</button>
           <button class="action-btn danger" @click="deleteChapter(chapter)">删除</button>
         </div>
@@ -323,16 +358,16 @@ onMounted(() => {
         <div class="edit-form">
           <div class="form-group">
             <label>章节标题</label>
-            <input 
-              v-model="editForm.title" 
-              type="text" 
+            <input
+              v-model="editForm.title"
+              type="text"
               :placeholder="`第${editingChapter ? editingChapter.chapterNumber : chapters.length + 1}章`"
             />
           </div>
           <div class="form-group">
             <label>章节内容</label>
-            <textarea 
-              v-model="editForm.content" 
+            <textarea
+              v-model="editForm.content"
               placeholder="在此输入章节内容..."
               rows="20"
             ></textarea>
@@ -705,7 +740,7 @@ onMounted(() => {
   .chapter-item {
     flex-wrap: wrap;
   }
-  
+
   .chapter-actions {
     width: 100%;
     justify-content: flex-end;

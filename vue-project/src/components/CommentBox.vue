@@ -89,7 +89,7 @@ const loadComments = async () => {
       comments.value = []
       return
     }
-    
+
     if (response.code === 200) {
       const data = response.data
       comments.value = data.content || data || []
@@ -105,9 +105,13 @@ const loadComments = async () => {
 }
 
 // 监听小说ID和章节ID变化，重新加载评论
-watch([effectiveNovelId, effectiveChapterId], () => {
-  loadComments()
-}, { immediate: true })
+watch(
+  [effectiveNovelId, effectiveChapterId],
+  () => {
+    loadComments()
+  },
+  { immediate: true }
+)
 
 // 组件挂载时加载评论
 onMounted(() => {
@@ -122,27 +126,27 @@ const handleSubmit = async () => {
     ElMessage.warning('请先登录')
     return
   }
-  
+
   if (!newComment.value.trim()) {
     ElMessage.warning('请输入评论内容')
     return
   }
-  
+
   submitting.value = true
   try {
     const commentData = {
       content: newComment.value.trim(),
       commentType: effectiveCommentType.value
     }
-    
+
     if (effectiveCommentType.value === 'CHAPTER' && effectiveChapterId.value) {
       commentData.chapterId = effectiveChapterId.value
     } else if (effectiveNovelId.value) {
       commentData.novelId = effectiveNovelId.value
     }
-    
+
     const response = await commentApi.createComment(commentData)
-    
+
     if (response.code === 200) {
       ElMessage.success('评论成功')
       newComment.value = ''
@@ -162,17 +166,17 @@ const handleSubmit = async () => {
  * 回复评论
  * @param {Object} parentComment 父评论对象
  */
-const handleReply = async (parentComment) => {
+const handleReply = async parentComment => {
   if (!currentUser.value) {
     ElMessage.warning('请先登录')
     return
   }
-  
+
   if (!replyContent.value.trim()) {
     ElMessage.warning('请输入回复内容')
     return
   }
-  
+
   submitting.value = true
   try {
     const commentData = {
@@ -180,15 +184,15 @@ const handleReply = async (parentComment) => {
       commentType: effectiveCommentType.value,
       parentId: parentComment.id
     }
-    
+
     if (effectiveCommentType.value === 'CHAPTER' && effectiveChapterId.value) {
       commentData.chapterId = effectiveChapterId.value
     } else if (effectiveNovelId.value) {
       commentData.novelId = effectiveNovelId.value
     }
-    
+
     const response = await commentApi.createComment(commentData)
-    
+
     if (response.code === 200) {
       ElMessage.success('回复成功')
       replyContent.value = ''
@@ -209,7 +213,7 @@ const handleReply = async (parentComment) => {
  * 设置回复对象
  * @param {Object} comment 评论对象
  */
-const setReplyTo = (comment) => {
+const setReplyTo = comment => {
   replyTo.value = comment
   replyContent.value = ''
 }
@@ -227,7 +231,7 @@ const cancelReply = () => {
  * @param {string} dateStr 日期字符串
  * @return {string} 格式化后的日期
  */
-const formatDate = (dateStr) => {
+const formatDate = dateStr => {
   if (!dateStr) return ''
   const date = new Date(dateStr)
   return date.toLocaleString('zh-CN', {
@@ -251,12 +255,12 @@ const formatDate = (dateStr) => {
       <h3>评论区</h3>
       <span class="comment-count">{{ comments.length }} 条评论</span>
     </div>
-    
+
     <div class="comment-input-area">
       <div class="input-wrapper">
-        <img 
-          v-if="currentUser" 
-          :src="`https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.username}`" 
+        <img
+          v-if="currentUser"
+          :src="`https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.username}`"
           class="user-avatar"
           alt="avatar"
         />
@@ -266,8 +270,8 @@ const formatDate = (dateStr) => {
             <circle cx="12" cy="7" r="4"></circle>
           </svg>
         </div>
-        <textarea 
-          v-model="newComment" 
+        <textarea
+          v-model="newComment"
           placeholder="写下你的想法..."
           rows="3"
           :disabled="!currentUser"
@@ -277,13 +281,22 @@ const formatDate = (dateStr) => {
         <span v-if="!currentUser" class="login-hint">
           <RouterLink to="/login">登录</RouterLink> 后参与评论
         </span>
-        <button 
-          class="btn-submit" 
-          @click="handleSubmit"
+        <button
+          class="btn-submit"
           :disabled="!currentUser || !newComment.trim() || submitting"
+          @click="handleSubmit"
         >
           <svg v-if="submitting" class="spinner-icon" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" stroke-dasharray="31.4" stroke-dashoffset="10"></circle>
+            <circle
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="2"
+              fill="none"
+              stroke-dasharray="31.4"
+              stroke-dashoffset="10"
+            ></circle>
           </svg>
           <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="22" y1="2" x2="11" y2="13"></line>
@@ -293,12 +306,12 @@ const formatDate = (dateStr) => {
         </button>
       </div>
     </div>
-    
-    <div class="comments-list" v-if="!loading && comments.length > 0">
+
+    <div v-if="!loading && comments.length > 0" class="comments-list">
       <div v-for="comment in comments" :key="comment.id" class="comment-item">
         <div class="comment-avatar">
-          <img 
-            :src="`https://api.dicebear.com/7.x/avataaars/svg?seed=${comment.user?.username || 'anonymous'}`" 
+          <img
+            :src="`https://api.dicebear.com/7.x/avataaars/svg?seed=${comment.user?.username || 'anonymous'}`"
             alt="avatar"
           />
         </div>
@@ -311,35 +324,37 @@ const formatDate = (dateStr) => {
           <div class="comment-actions">
             <button class="action-btn" @click="setReplyTo(comment)">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                <path
+                  d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
+                ></path>
               </svg>
               回复
             </button>
           </div>
-          
+
           <div v-if="replyTo?.id === comment.id" class="reply-input-area">
-            <textarea 
-              v-model="replyContent" 
+            <textarea
+              v-model="replyContent"
               :placeholder="`回复 ${comment.user?.username || '匿名用户'}...`"
               rows="2"
             ></textarea>
             <div class="reply-actions">
               <button class="btn-cancel" @click="cancelReply">取消</button>
-              <button 
-                class="btn-reply" 
-                @click="handleReply(comment)"
+              <button
+                class="btn-reply"
                 :disabled="!replyContent.trim() || submitting"
+                @click="handleReply(comment)"
               >
                 {{ submitting ? '发送中...' : '发送' }}
               </button>
             </div>
           </div>
-          
+
           <div v-if="comment.replies && comment.replies.length > 0" class="replies-list">
             <div v-for="reply in comment.replies" :key="reply.id" class="reply-item">
               <div class="reply-avatar">
-                <img 
-                  :src="`https://api.dicebear.com/7.x/avataaars/svg?seed=${reply.user?.username || 'anonymous'}`" 
+                <img
+                  :src="`https://api.dicebear.com/7.x/avataaars/svg?seed=${reply.user?.username || 'anonymous'}`"
                   alt="avatar"
                 />
               </div>
@@ -355,12 +370,12 @@ const formatDate = (dateStr) => {
         </div>
       </div>
     </div>
-    
+
     <div v-else-if="loading" class="loading-state">
       <div class="spinner"></div>
       <p>加载评论中...</p>
     </div>
-    
+
     <div v-else class="empty-state">
       <div class="empty-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -544,7 +559,9 @@ const formatDate = (dateStr) => {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .comments-list {
@@ -833,41 +850,41 @@ const formatDate = (dateStr) => {
   .comment-input-area {
     padding: 16px;
   }
-  
+
   .input-wrapper {
     flex-direction: column;
     gap: 12px;
   }
-  
+
   .user-avatar,
   .avatar-placeholder {
     width: 36px;
     height: 36px;
   }
-  
+
   .input-actions {
     flex-direction: column;
     gap: 12px;
     align-items: stretch;
   }
-  
+
   .login-hint {
     text-align: center;
   }
-  
+
   .btn-submit {
     justify-content: center;
   }
-  
+
   .comment-item {
     padding: 16px;
   }
-  
+
   .comment-avatar img {
     width: 36px;
     height: 36px;
   }
-  
+
   .replies-list {
     padding-left: 12px;
   }

@@ -14,11 +14,7 @@
 
     <!-- 小说列表 -->
     <div class="novel-grid">
-      <NovelCard 
-        v-for="novel in novels"
-        :key="novel.id"
-        :novel="novel"
-      />
+      <NovelCard v-for="novel in novels" :key="novel.id" :novel="novel" />
     </div>
 
     <!-- 加载状态 -->
@@ -38,25 +34,25 @@
     <!-- 分页器 -->
     <div v-if="!loading && totalPages > 1" class="pagination-container">
       <div class="pagination">
-        <button 
+        <button
           class="page-btn page-btn-arrow"
-          @click="goToFirstPage"
           :disabled="currentPage === 0"
           title="首页"
+          @click="goToFirstPage"
         >
           «
         </button>
-        <button 
+        <button
           class="page-btn page-btn-arrow"
-          @click="goToPrevPage"
           :disabled="currentPage === 0"
           title="上一页"
+          @click="goToPrevPage"
         >
           ‹
         </button>
-        
-        <button 
-          v-for="page in getPageNumbers" 
+
+        <button
+          v-for="page in getPageNumbers"
           :key="page"
           class="page-btn page-btn-number"
           :class="{ active: currentPage === page }"
@@ -64,41 +60,41 @@
         >
           {{ page + 1 }}
         </button>
-        
-        <button 
+
+        <button
           class="page-btn page-btn-arrow"
-          @click="goToNextPage"
           :disabled="currentPage === totalPages - 1"
           title="下一页"
+          @click="goToNextPage"
         >
           ›
         </button>
-        <button 
+        <button
           class="page-btn page-btn-arrow"
-          @click="goToLastPage"
           :disabled="currentPage === totalPages - 1"
           title="末页"
+          @click="goToLastPage"
         >
           »
         </button>
       </div>
-      
+
       <div class="pagination-info">
         <span>共 {{ totalElements }} 本小说</span>
         <span>第 {{ currentPage + 1 }} / {{ totalPages }} 页</span>
       </div>
-      
+
       <div class="pagination-jump">
         <span>跳转到</span>
-        <input 
-          type="number" 
+        <input
           v-model.number="jumpPage"
-          @keyup.enter="handleJumpPage"
+          type="number"
           :min="1"
           :max="totalPages"
           class="jump-input"
+          @keyup.enter="handleJumpPage"
         />
-        <button @click="handleJumpPage" class="jump-btn">确定</button>
+        <button class="jump-btn" @click="handleJumpPage">确定</button>
       </div>
     </div>
   </div>
@@ -107,7 +103,7 @@
 <script setup>
 /**
  * RecommendationList.vue - 推荐列表页面组件
- * 
+ *
  * 该组件实现了小说推荐列表功能，包括：
  * - 个性化推荐：根据用户阅读喜好推荐
  * - 重磅推荐：收藏人数最多的热门小说
@@ -169,12 +165,12 @@ const loadNovels = async (page = 0) => {
   loading.value = true
   try {
     let response
-    
+
     if (pageType === 'personalized') {
       // 个性化推荐
       response = await recommendationApi.getPersonalizedRecommendations(100)
       if (response.code === 200 && response.data) {
-        const novelList = Array.isArray(response.data) ? response.data : (response.data.content || [])
+        const novelList = Array.isArray(response.data) ? response.data : response.data.content || []
         const allNovels = novelList.map(novel => ({
           id: novel.id,
           title: novel.title,
@@ -184,7 +180,7 @@ const loadNovels = async (page = 0) => {
           category: novel.category,
           status: novel.status
         }))
-        
+
         // 计算分页
         totalElements.value = allNovels.length
         totalPages.value = Math.ceil(allNovels.length / pageSize.value)
@@ -196,7 +192,7 @@ const loadNovels = async (page = 0) => {
       // 重磅推荐（收藏人数最多）
       response = await recommendationApi.getBookmarkRecommendations(100)
       if (response.code === 200 && response.data) {
-        const novelList = Array.isArray(response.data) ? response.data : (response.data.content || [])
+        const novelList = Array.isArray(response.data) ? response.data : response.data.content || []
         const allNovels = novelList.map(novel => ({
           id: novel.id,
           title: novel.title,
@@ -208,7 +204,7 @@ const loadNovels = async (page = 0) => {
           views: novel.views || 0,
           bookmarks: novel.bookmarks || 0
         }))
-        
+
         // 计算分页
         totalElements.value = allNovels.length
         totalPages.value = Math.ceil(allNovels.length / pageSize.value)
@@ -220,7 +216,7 @@ const loadNovels = async (page = 0) => {
       // 热门推荐（阅读历史最多）
       response = await recommendationApi.getReadingHistoryRecommendations(100)
       if (response.code === 200 && response.data) {
-        const novelList = Array.isArray(response.data) ? response.data : (response.data.content || [])
+        const novelList = Array.isArray(response.data) ? response.data : response.data.content || []
         const allNovels = novelList.map(novel => ({
           id: novel.id,
           title: novel.title,
@@ -232,7 +228,7 @@ const loadNovels = async (page = 0) => {
           views: novel.views || 0,
           bookmarks: novel.bookmarks || 0
         }))
-        
+
         // 计算分页
         totalElements.value = allNovels.length
         totalPages.value = Math.ceil(allNovels.length / pageSize.value)
@@ -244,7 +240,7 @@ const loadNovels = async (page = 0) => {
       // 完结精品（观看人数与收藏数最多的完结小说）
       response = await recommendationApi.getCompletedRecommendations(100)
       if (response.code === 200 && response.data) {
-        const novelList = Array.isArray(response.data) ? response.data : (response.data.content || [])
+        const novelList = Array.isArray(response.data) ? response.data : response.data.content || []
         const allNovels = novelList.map(novel => ({
           id: novel.id,
           title: novel.title,
@@ -256,7 +252,7 @@ const loadNovels = async (page = 0) => {
           views: novel.views || 0,
           bookmarks: novel.bookmarks || 0
         }))
-        
+
         // 计算分页
         totalElements.value = allNovels.length
         totalPages.value = Math.ceil(allNovels.length / pageSize.value)
@@ -274,7 +270,7 @@ const loadNovels = async (page = 0) => {
 }
 
 // 分页控制函数
-const goToPage = (page) => {
+const goToPage = page => {
   if (page < 0 || page >= totalPages.value) return
   currentPage.value = page
   loadNovels(page)
@@ -311,16 +307,16 @@ const getPageNumbers = computed(() => {
   const pages = []
   const maxVisible = 5
   let start = Math.max(0, currentPage.value - Math.floor(maxVisible / 2))
-  let end = Math.min(totalPages.value, start + maxVisible)
-  
+  const end = Math.min(totalPages.value, start + maxVisible)
+
   if (end - start < maxVisible) {
     start = Math.max(0, end - maxVisible)
   }
-  
+
   for (let i = start; i < end; i++) {
     pages.push(i)
   }
-  
+
   return pages
 })
 
@@ -532,7 +528,9 @@ onMounted(() => {
 }
 
 @keyframes bounce {
-  0%, 80%, 100% {
+  0%,
+  80%,
+  100% {
     transform: scale(0);
   }
   40% {

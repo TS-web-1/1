@@ -14,12 +14,16 @@ export const readingApi = {
 
   // 获取章节导航（上一章/下一章）
   getChapterNavigation(novelId, currentChapterId) {
-    return apiClient.get(`/reading/chapter/navigation/${novelId}?currentChapterId=${currentChapterId}`)
+    return apiClient.get(
+      `/reading/chapter/navigation/${novelId}?currentChapterId=${currentChapterId}`
+    )
   },
 
   // 保存阅读进度
   saveReadingProgress(novelId, chapterId, position, progressPercent, readTime) {
-    return apiClient.post(`/reading/progress/${novelId}?chapterId=${chapterId}&position=${position}&progressPercent=${progressPercent}&readTime=${readTime}`)
+    return apiClient.post(
+      `/reading/progress/${novelId}?chapterId=${chapterId}&position=${position}&progressPercent=${progressPercent}&readTime=${readTime}`
+    )
   },
 
   // 获取阅读进度

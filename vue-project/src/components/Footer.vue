@@ -9,11 +9,11 @@ const goToAuthorCenter = () => {
   const userInfoStr = localStorage.getItem('userInfo')
   const userInfo = userInfoStr ? JSON.parse(userInfoStr) : null
   const userRole = userInfo?.role || 'USER'
-  
+
   console.log('goToAuthorCenter - token:', token ? '存在' : '不存在')
   console.log('goToAuthorCenter - userInfo:', userInfo)
   console.log('goToAuthorCenter - userRole:', userRole)
-  
+
   if (!token) {
     console.log('未登录，跳转到作者端登录页')
     // 未登录，跳转到作者端登录页
@@ -37,11 +37,11 @@ const goToAdmin = () => {
   const userInfoStr = localStorage.getItem('userInfo')
   const userInfo = userInfoStr ? JSON.parse(userInfoStr) : null
   const userRole = userInfo?.role || 'USER'
-  
+
   console.log('goToAdmin - token:', token ? '存在' : '不存在')
   console.log('goToAdmin - userInfo:', userInfo)
   console.log('goToAdmin - userRole:', userRole)
-  
+
   if (!token) {
     console.log('未登录，跳转到管理后端登录页')
     // 未登录，跳转到管理后端登录页
@@ -220,12 +220,12 @@ const goToAdmin = () => {
     padding: 40px 0 20px;
     margin-top: 40px;
   }
-  
+
   .footer-container {
     padding: 0 var(--spacing-md);
     gap: var(--spacing-xl);
   }
-  
+
   .footer-about h3,
   .footer-links h3,
   .footer-contact h3 {

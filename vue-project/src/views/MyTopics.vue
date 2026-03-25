@@ -1,20 +1,16 @@
 <template>
   <div class="my-topics">
     <h1>我的话题</h1>
-    
+
     <div v-if="loading" class="loading">加载中...</div>
-    
+
     <div v-else-if="topics.length === 0" class="empty">
       <p>暂无话题</p>
-      <button @click="goToCommunity" class="create-btn">发起话题</button>
+      <button class="create-btn" @click="goToCommunity">发起话题</button>
     </div>
-    
+
     <div v-else class="topics-list">
-      <div 
-        v-for="topic in topics" 
-        :key="topic.id" 
-        class="topic-item"
-      >
+      <div v-for="topic in topics" :key="topic.id" class="topic-item">
         <div class="topic-header">
           <h3>{{ topic.title }}</h3>
           <span class="topic-time">{{ formatTime(topic.createdAt) }}</span>
@@ -26,12 +22,8 @@
           <span>❤️ {{ topic.likeCount || 0 }}</span>
         </div>
         <div class="topic-actions">
-          <button @click="viewTopic(topic.id)" class="view-btn">查看</button>
-          <button 
-            v-if="!topic.deleted"
-            @click="deleteTopic(topic.id)" 
-            class="delete-btn"
-          >
+          <button class="view-btn" @click="viewTopic(topic.id)">查看</button>
+          <button v-if="!topic.deleted" class="delete-btn" @click="deleteTopic(topic.id)">
             删除
           </button>
         </div>
@@ -43,7 +35,7 @@
 <script setup>
 /**
  * MyTopics.vue - 我的话题页面组件
- * 
+ *
  * 该组件实现了用户话题管理功能，包括：
  * - 展示用户创建的话题列表
  * - 查看话题详情
@@ -90,7 +82,7 @@ const loadMyTopics = async () => {
  * 查看话题详情
  * @param {number} topicId - 话题ID
  */
-const viewTopic = (topicId) => {
+const viewTopic = topicId => {
   router.push(`/topic/${topicId}`)
 }
 
@@ -98,9 +90,9 @@ const viewTopic = (topicId) => {
  * 删除话题
  * @param {number} topicId - 话题ID
  */
-const deleteTopic = async (topicId) => {
+const deleteTopic = async topicId => {
   if (!confirm('确定要删除这个话题吗？')) return
-  
+
   try {
     const response = await discussionApi.deleteTopic(topicId)
     if (response.code === 200) {
@@ -119,15 +111,15 @@ const goToCommunity = () => {
   router.push('/community')
 }
 
-const formatTime = (dateString) => {
+const formatTime = dateString => {
   const date = new Date(dateString)
   const now = new Date()
   const diff = now - date
-  
+
   const minute = 60 * 1000
   const hour = 60 * minute
   const day = 24 * hour
-  
+
   if (diff < minute) {
     return '刚刚'
   } else if (diff < hour) {
@@ -156,7 +148,8 @@ h1 {
   color: #333;
 }
 
-.loading, .empty {
+.loading,
+.empty {
   text-align: center;
   padding: 60px 20px;
   color: #999;
@@ -165,7 +158,7 @@ h1 {
 .create-btn {
   margin-top: 16px;
   padding: 10px 24px;
-  background: #409EFF;
+  background: #409eff;
   color: #fff;
   border: none;
   border-radius: 4px;
@@ -228,7 +221,8 @@ h1 {
   gap: 8px;
 }
 
-.view-btn, .delete-btn {
+.view-btn,
+.delete-btn {
   padding: 8px 20px;
   border: none;
   border-radius: 4px;
@@ -236,7 +230,7 @@ h1 {
 }
 
 .view-btn {
-  background: #409EFF;
+  background: #409eff;
   color: #fff;
 }
 

@@ -4,7 +4,6 @@ import { useRoute } from 'vue-router'
 import Header from './components/Header.vue'
 import Footer from './components/Footer.vue'
 
-
 const route = useRoute()
 
 // 获取应用类型
@@ -21,10 +20,10 @@ const showLayout = computed(() => {
 // 根据路由动态设置背景类
 const getBackgroundClass = () => {
   const path = route.path
-  
+
   if (appType === 'admin') return 'bg-admin'
   if (appType === 'author') return 'bg-author'
-  
+
   if (path === '/') return 'bg-home'
   if (path.startsWith('/category')) return 'bg-category'
   if (path.startsWith('/novel/')) return 'bg-detail'
@@ -34,7 +33,7 @@ const getBackgroundClass = () => {
   if (path === '/community') return 'bg-community'
   if (path === '/search') return 'bg-search'
   if (path.startsWith('/login') || path.startsWith('/register')) return 'bg-auth'
-  
+
   return 'bg-home'
 }
 </script>
@@ -57,7 +56,8 @@ const getBackgroundClass = () => {
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   width: 100%;
   height: 100%;
   margin: 0;

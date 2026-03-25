@@ -1,7 +1,7 @@
 <script setup>
 /**
  * ChapterReader.vue - 章节阅读页面组件
- * 
+ *
  * 该组件实现了小说章节阅读功能，包括：
  * - 章节内容展示
  * - 阅读进度自动保存
@@ -44,34 +44,46 @@ let progressSaveTimer = null
 const saveProgress = () => {
   const token = localStorage.getItem('token')
   if (!token || !novelId.value || !chapterId.value) {
-    console.log('不保存阅读进度：token=', !!token, 'novelId=', novelId.value, 'chapterId=', chapterId.value)
+    console.log(
+      '不保存阅读进度：token=',
+      !!token,
+      'novelId=',
+      novelId.value,
+      'chapterId=',
+      chapterId.value
+    )
     return
   }
   const position = contentRef.value ? Math.min(contentRef.value.scrollTop || 0, 999999) : 0
-  const totalHeight = contentRef.value ? contentRef.value.scrollHeight - contentRef.value.clientHeight : 1
+  const totalHeight = contentRef.value
+    ? contentRef.value.scrollHeight - contentRef.value.clientHeight
+    : 1
   const progressPercent = totalHeight > 0 ? Math.min(100, (position / totalHeight) * 100) : 0
   const readTime = Math.max(0, Math.floor((Date.now() - readStartTime) / 1000))
-  
+
   console.log('=== 保存阅读进度 ===')
   console.log('novelId:', Number(novelId.value))
   console.log('chapterId:', Number(chapterId.value))
   console.log('position:', position)
   console.log('progressPercent:', progressPercent)
   console.log('readTime:', readTime)
-  
-  readingApi.saveReadingProgress(
-    Number(novelId.value),
-    Number(chapterId.value),
-    position,
-    Math.round(progressPercent * 100) / 100,
-    readTime
-  ).then(res => {
-    console.log('=== 阅读进度保存成功 ===')
-    console.log('响应:', res)
-  }).catch(err => {
-    console.error('=== 阅读进度保存失败 ===')
-    console.error('错误:', err)
-  })
+
+  readingApi
+    .saveReadingProgress(
+      Number(novelId.value),
+      Number(chapterId.value),
+      position,
+      Math.round(progressPercent * 100) / 100,
+      readTime
+    )
+    .then(res => {
+      console.log('=== 阅读进度保存成功 ===')
+      console.log('响应:', res)
+    })
+    .catch(err => {
+      console.error('=== 阅读进度保存失败 ===')
+      console.error('错误:', err)
+    })
 }
 
 /**
@@ -140,11 +152,11 @@ const loadChapterContent = async () => {
       })
     } else {
       console.error('章节内容响应错误:', response)
-      ElMessage.error('加载章节内容失败：' + (response.message || '未知错误'))
+      ElMessage.error(`加载章节内容失败：${response.message || '未知错误'}`)
     }
   } catch (error) {
     console.error('加载章节内容失败:', error)
-    ElMessage.error('加载章节内容失败：' + error.message)
+    ElMessage.error(`加载章节内容失败：${error.message}`)
   } finally {
     loading.value = false
   }
@@ -262,7 +274,7 @@ watch(
   <div class="chapter-reader" :class="{ 'light-mode': !darkMode }">
     <div class="reader-header">
       <div class="header-left">
-        <button @click="goBack" class="back-btn">
+        <button class="back-btn" @click="goBack">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="19" y1="12" x2="5" y2="12"></line>
             <polyline points="12 19 5 12 12 5"></polyline>
@@ -272,23 +284,46 @@ watch(
         <h1 class="chapter-title">{{ chapter.title }}</h1>
       </div>
       <div class="reader-controls">
-        <button @click="decreaseFontSize" class="control-btn" title="减小字号">
-          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <button class="control-btn" title="减小字号" @click="decreaseFontSize">
+          <svg
+            class="icon-sm"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="8" y1="11" x2="14" y2="11"></line>
           </svg>
         </button>
         <span class="font-size-display">{{ fontsize }}px</span>
-        <button @click="increaseFontSize" class="control-btn" title="增大字号">
-          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <button class="control-btn" title="增大字号" @click="increaseFontSize">
+          <svg
+            class="icon-sm"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="11" y1="8" x2="11" y2="14"></line>
             <line x1="8" y1="11" x2="14" y2="11"></line>
           </svg>
         </button>
         <div class="control-divider"></div>
-        <button @click="toggleDarkMode" class="control-btn mode-toggle" :title="darkMode ? '切换日间模式' : '切换夜间模式'">
-          <svg v-if="darkMode" class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <button
+          class="control-btn mode-toggle"
+          :title="darkMode ? '切换日间模式' : '切换夜间模式'"
+          @click="toggleDarkMode"
+        >
+          <svg
+            v-if="darkMode"
+            class="icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
             <circle cx="12" cy="12" r="5"></circle>
             <line x1="12" y1="1" x2="12" y2="3"></line>
             <line x1="12" y1="21" x2="12" y2="23"></line>
@@ -299,28 +334,35 @@ watch(
             <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
             <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
           </svg>
-          <svg v-else class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg
+            v-else
+            class="icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
           </svg>
           {{ darkMode ? '日间' : '夜间' }}
         </button>
       </div>
     </div>
-    
+
     <div ref="contentRef" class="chapter-content" :style="{ fontSize: fontsize + 'px' }">
       <p v-for="(paragraph, index) in (chapter.content || '').split('\n\n')" :key="index">
         {{ paragraph }}
       </p>
     </div>
-    
+
     <div class="chapter-navigation">
-      <button @click="handlePrevChapter" class="nav-btn prev-btn" :disabled="!prevChapter">
+      <button class="nav-btn prev-btn" :disabled="!prevChapter" @click="handlePrevChapter">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="15 18 9 12 15 6"></polyline>
         </svg>
         上一章
       </button>
-      <button @click="goBack" class="nav-btn catalog-btn">
+      <button class="nav-btn catalog-btn" @click="goBack">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="8" y1="6" x2="21" y2="6"></line>
           <line x1="8" y1="12" x2="21" y2="12"></line>
@@ -331,19 +373,19 @@ watch(
         </svg>
         目录
       </button>
-      <button @click="handleNextChapter" class="nav-btn next-btn" :disabled="!nextChapter">
+      <button class="nav-btn next-btn" :disabled="!nextChapter" @click="handleNextChapter">
         下一章
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="9 18 15 12 9 6"></polyline>
         </svg>
       </button>
     </div>
-    
+
     <div class="comments-section">
-      <CommentBox 
-        :chapterId="parseInt(chapterId)" 
-        :novelId="parseInt(novelId)"
-        commentType="CHAPTER" 
+      <CommentBox
+        :chapter-id="parseInt(chapterId)"
+        :novel-id="parseInt(novelId)"
+        comment-type="CHAPTER"
       />
     </div>
   </div>
@@ -713,7 +755,7 @@ watch(
   .chapter-reader {
     padding: 24px 16px;
   }
-  
+
   .chapter-content {
     padding: 32px 24px;
   }
@@ -779,14 +821,14 @@ watch(
     background: white;
     color: black;
   }
-  
+
   .reader-header,
   .reader-controls,
   .chapter-navigation,
   .comments-section {
     display: none;
   }
-  
+
   .chapter-content {
     box-shadow: none;
     border: none;
@@ -794,7 +836,7 @@ watch(
     max-height: none;
     background: white;
   }
-  
+
   .chapter-content p {
     color: black;
   }

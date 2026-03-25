@@ -1,7 +1,7 @@
 <script setup>
 /**
  * Login.vue - 用户登录页面组件
- * 
+ *
  * 该组件实现了用户登录功能，包括：
  * - 用户名和密码输入
  * - 密码显示/隐藏切换
@@ -39,13 +39,13 @@ const handleLogin = async () => {
     const response = await authApi.login({
       username: username.value,
       password: password.value,
-      appType: appType
+      appType
     })
-    
+
     if (response.code === 200) {
       const userRole = (response.data.userInfo?.role || 'USER').toUpperCase()
       localStorage.setItem('userRole', userRole)
-      
+
       userStore.setToken(response.data.token)
       userStore.setUserInfo(response.data.userInfo)
 
@@ -88,108 +88,181 @@ const handleLogin = async () => {
       <div class="bg-gradient"></div>
       <div class="bg-pattern"></div>
     </div>
-    
+
     <div class="login-container">
       <div class="login-card">
         <div class="card-header">
           <div class="logo">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+            <svg
+              width="48"
+              height="48"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+            >
+              <path
+                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+              />
             </svg>
           </div>
           <h1 class="title">{{ appTitle }}</h1>
           <p class="subtitle">欢迎回来，开启阅读之旅</p>
         </div>
-        
-        <form @submit.prevent="handleLogin" class="login-form">
+
+        <form class="login-form" @submit.prevent="handleLogin">
           <div class="form-group">
             <label for="username">用户名</label>
             <div class="input-wrapper">
-              <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
+              <svg
+                class="input-icon"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
               </svg>
-              <input 
-                type="text" 
-                id="username" 
-                v-model="username" 
+              <input
+                id="username"
+                v-model="username"
+                type="text"
                 placeholder="请输入用户名"
                 autocomplete="username"
                 required
               />
             </div>
           </div>
-          
+
           <div class="form-group">
             <label for="password">密码</label>
             <div class="input-wrapper">
-              <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              <svg
+                class="input-icon"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
               </svg>
-              <input 
-                :type="showPassword ? 'text' : 'password'" 
-                id="password" 
-                v-model="password" 
+              <input
+                id="password"
+                v-model="password"
+                :type="showPassword ? 'text' : 'password'"
                 placeholder="请输入密码"
                 autocomplete="current-password"
                 required
               />
-              <button 
-                type="button" 
+              <button
+                type="button"
                 class="toggle-password"
-                @click="showPassword = !showPassword"
                 :aria-label="showPassword ? '隐藏密码' : '显示密码'"
+                @click="showPassword = !showPassword"
               >
-                <svg v-if="!showPassword" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                  <circle cx="12" cy="12" r="3"/>
+                <svg
+                  v-if="!showPassword"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                  <circle cx="12" cy="12" r="3" />
                 </svg>
-                <svg v-else width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-                  <line x1="1" y1="1" x2="23" y2="23"/>
+                <svg
+                  v-else
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
+                  />
+                  <line x1="1" y1="1" x2="23" y2="23" />
                 </svg>
               </button>
             </div>
           </div>
-          
+
           <button type="submit" class="submit-btn" :disabled="loading">
             <span v-if="loading" class="loading-content">
               <svg class="spinner" width="20" height="20" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="31.4 31.4" stroke-linecap="round"/>
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="3"
+                  fill="none"
+                  stroke-dasharray="31.4 31.4"
+                  stroke-linecap="round"
+                />
               </svg>
               登录中...
             </span>
             <span v-else>登录</span>
           </button>
         </form>
-        
+
         <div class="card-footer">
           <p>还没有账号？<RouterLink to="/register">立即注册</RouterLink></p>
         </div>
       </div>
-      
+
       <div class="login-features">
         <div class="feature">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
           </svg>
           <span>海量精品小说</span>
         </div>
         <div class="feature">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <polyline points="12 6 12 12 16 14"/>
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
           </svg>
           <span>随时畅读</span>
         </div>
         <div class="feature">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-            <circle cx="9" cy="7" r="4"/>
-            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
           </svg>
           <span>社区互动</span>
         </div>
@@ -220,7 +293,7 @@ const handleLogin = async () => {
 .bg-gradient {
   position: absolute;
   inset: 0;
-  background: 
+  background:
     radial-gradient(ellipse at 20% 20%, rgba(201, 169, 98, 0.15) 0%, transparent 50%),
     radial-gradient(ellipse at 80% 80%, rgba(201, 169, 98, 0.1) 0%, transparent 50%),
     linear-gradient(180deg, #0d1117 0%, #161b22 100%);
@@ -397,7 +470,9 @@ const handleLogin = async () => {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .card-footer {
@@ -450,15 +525,15 @@ const handleLogin = async () => {
   .login-card {
     padding: 32px 24px;
   }
-  
+
   .title {
     font-size: 24px;
   }
-  
+
   .login-features {
     gap: 20px;
   }
-  
+
   .feature span {
     font-size: 11px;
   }

@@ -1,7 +1,7 @@
 <script setup>
 /**
  * AuthorNovelEdit.vue - 作者作品编辑页面组件
- * 
+ *
  * 该组件实现了作品的创建和编辑功能，包括：
  * - 作品标题、作者、简介输入
  * - 封面图片上传
@@ -67,16 +67,16 @@ const saveNovel = async () => {
     ElMessage.warning('请输入作品名称')
     return
   }
-  
+
   if (!novel.value.description.trim()) {
     ElMessage.warning('请输入作品简介')
     return
   }
-  
+
   try {
     // 直接使用封面数据（支持 base64 或 URL）
     const coverUrl = novel.value.cover || ''
-    
+
     const novelData = {
       title: novel.value.title,
       description: novel.value.description,
@@ -84,14 +84,14 @@ const saveNovel = async () => {
       category: novel.value.category,
       status: novel.value.status === '连载中' ? 'ONGOING' : 'COMPLETED'
     }
-    
+
     let response
     if (isEdit) {
       response = await authorApi.updateNovel(novelId, novelData)
     } else {
       response = await authorApi.publishNovel(novelData)
     }
-    
+
     if (response.code === 200) {
       ElMessage.success(isEdit ? '作品更新成功' : '作品创建成功')
       router.push('/author')
@@ -110,11 +110,11 @@ const cancel = () => {
 }
 
 // 处理封面上传
-const handleCoverUpload = (event) => {
+const handleCoverUpload = event => {
   const file = event.target.files[0]
   if (file) {
     const reader = new FileReader()
-    reader.onload = (e) => {
+    reader.onload = e => {
       novel.value.cover = e.target.result
     }
     reader.readAsDataURL(file)
@@ -130,20 +130,15 @@ onMounted(() => {
   <div class="novel-edit">
     <div class="edit-container">
       <h1>{{ isEdit ? '编辑作品' : '创建新作品' }}</h1>
-      
-      <form @submit.prevent="saveNovel" class="edit-form">
+
+      <form class="edit-form" @submit.prevent="saveNovel">
         <div class="form-main">
           <div class="form-group">
             <label>作品名称 <span class="required">*</span></label>
-            <input 
-              v-model="novel.title" 
-              type="text" 
-              placeholder="请输入作品名称"
-              maxlength="50"
-            />
+            <input v-model="novel.title" type="text" placeholder="请输入作品名称" maxlength="50" />
             <span class="char-count">{{ novel.title.length }}/50</span>
           </div>
-          
+
           <div class="form-row">
             <div class="form-group">
               <label>分类</label>
@@ -153,7 +148,7 @@ onMounted(() => {
                 </option>
               </select>
             </div>
-            
+
             <div class="form-group">
               <label>状态</label>
               <select v-model="novel.status">
@@ -163,11 +158,11 @@ onMounted(() => {
               </select>
             </div>
           </div>
-          
+
           <div class="form-group">
             <label>作品简介 <span class="required">*</span></label>
-            <textarea 
-              v-model="novel.description" 
+            <textarea
+              v-model="novel.description"
               placeholder="请输入作品简介，让读者了解你的作品..."
               rows="6"
               maxlength="500"
@@ -175,21 +170,28 @@ onMounted(() => {
             <span class="char-count">{{ novel.description.length }}/500</span>
           </div>
         </div>
-        
+
         <div class="form-side">
           <div class="cover-upload">
             <label>作品封面</label>
             <div class="cover-preview" @click="$refs.coverInput.click()">
-              <img v-if="novel.cover" :src="novel.cover" @error="$event.target.style.display='none'; $event.target.nextElementSibling.style.display='flex'" />
+              <img
+                v-if="novel.cover"
+                :src="novel.cover"
+                @error="
+                  $event.target.style.display = 'none'
+                  $event.target.nextElementSibling.style.display = 'flex'
+                "
+              />
               <div class="cover-placeholder" :style="{ display: novel.cover ? 'none' : 'flex' }">
                 <span>+</span>
                 <p>点击上传封面</p>
               </div>
             </div>
-            <input 
+            <input
               ref="coverInput"
-              type="file" 
-              accept="image/*" 
+              type="file"
+              accept="image/*"
               style="display: none"
               @change="handleCoverUpload"
             />
@@ -197,7 +199,7 @@ onMounted(() => {
           </div>
         </div>
       </form>
-      
+
       <div class="form-actions">
         <button type="button" class="btn-cancel" @click="cancel">取消</button>
         <button type="submit" class="btn-save" @click="saveNovel">
@@ -405,11 +407,11 @@ onMounted(() => {
   .edit-form {
     grid-template-columns: 1fr;
   }
-  
+
   .form-row {
     grid-template-columns: 1fr;
   }
-  
+
   .cover-upload {
     max-width: 250px;
     margin: 0 auto;

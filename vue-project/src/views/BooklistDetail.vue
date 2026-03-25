@@ -1,12 +1,12 @@
 <template>
   <div class="booklist-detail">
     <div v-if="loading" class="loading">加载中...</div>
-    
+
     <div v-else-if="!booklist" class="empty">
       <p>书单不存在</p>
-      <button @click="goBack" class="back-btn">返回</button>
+      <button class="back-btn" @click="goBack">返回</button>
     </div>
-    
+
     <div v-else class="booklist-container">
       <div class="booklist-header">
         <h1>{{ booklist.title }}</h1>
@@ -17,25 +17,34 @@
         </div>
         <p v-if="booklist.description" class="description">{{ booklist.description }}</p>
       </div>
-      
+
       <div class="novels-grid">
-        <div 
-          v-for="novel in booklist.novels" 
-          :key="novel.id" 
+        <div
+          v-for="novel in booklist.novels"
+          :key="novel.id"
           class="novel-card"
           @click="goToNovel(novel.id)"
         >
           <div class="novel-cover">
-            <img :src="novel.coverImage ? `/api/novels/${novel.id}/cover` : 'https://via.placeholder.com/200x260'" :alt="novel.title" />
+            <img
+              :src="
+                novel.coverImage
+                  ? `/api/novels/${novel.id}/cover`
+                  : 'https://via.placeholder.com/200x260'
+              "
+              :alt="novel.title"
+            />
           </div>
           <div class="novel-info">
             <h3>{{ novel.title }}</h3>
             <p class="author">{{ novel.author }}</p>
-            <p v-if="novel.description" class="description">{{ novel.description.substring(0, 80) }}...</p>
+            <p v-if="novel.description" class="description"
+              >{{ novel.description.substring(0, 80) }}...</p
+            >
           </div>
         </div>
       </div>
-      
+
       <div v-if="!booklist.novels || booklist.novels.length === 0" class="no-novels">
         <p>这个书单还没有添加小说</p>
       </div>
@@ -46,7 +55,7 @@
 <script setup>
 /**
  * BooklistDetail.vue - 书单详情页面组件
- * 
+ *
  * 该组件实现了书单详情展示功能，包括：
  * - 书单标题、描述、创建者信息展示
  * - 书单中的小说列表展示
@@ -94,7 +103,7 @@ const loadBooklist = async () => {
  * 跳转到小说详情页
  * @param {number} novelId - 小说ID
  */
-const goToNovel = (novelId) => {
+const goToNovel = novelId => {
   router.push(`/novel/${novelId}`)
 }
 
@@ -102,7 +111,7 @@ const goBack = () => {
   router.back()
 }
 
-const formatTime = (dateString) => {
+const formatTime = dateString => {
   const date = new Date(dateString)
   return date.toLocaleDateString()
 }
@@ -116,7 +125,8 @@ const formatTime = (dateString) => {
   min-height: calc(100vh - 140px);
 }
 
-.loading, .empty {
+.loading,
+.empty {
   text-align: center;
   padding: 60px 20px;
   color: #999;
@@ -125,7 +135,7 @@ const formatTime = (dateString) => {
 .back-btn {
   margin-top: 16px;
   padding: 10px 24px;
-  background: #409EFF;
+  background: #409eff;
   color: #fff;
   border: none;
   border-radius: 4px;
@@ -180,7 +190,9 @@ const formatTime = (dateString) => {
   border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
 .novel-card:hover {

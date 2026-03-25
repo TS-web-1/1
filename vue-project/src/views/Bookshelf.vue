@@ -1,7 +1,7 @@
 <script setup>
 /**
  * Bookshelf.vue - 用户书架页面组件
- * 
+ *
  * 该组件实现了用户书架功能，包括：
  * - 展示用户收藏的小说列表
  * - 显示阅读进度
@@ -33,17 +33,21 @@ const loadBookmarks = async () => {
     const response = await bookmarkApi.getBookmarks()
     if (response.code === 200) {
       const bookmarksData = response.data || []
-      
-      for (let bookmark of bookmarksData) {
+
+      for (const bookmark of bookmarksData) {
         try {
           const novelId = bookmark.novel?.id || bookmark.novelId
-          
+
           let progressChapterId = null
           try {
             const progressResponse = await readingApi.getReadingProgress(novelId)
-            if (progressResponse.code === 200 && progressResponse.data && progressResponse.data.chapterId) {
+            if (
+              progressResponse.code === 200 &&
+              progressResponse.data &&
+              progressResponse.data.chapterId
+            ) {
               progressChapterId = progressResponse.data.chapterId
-              
+
               if (progressChapterId !== bookmark.chapterId) {
                 try {
                   await bookmarkApi.updateBookmark(bookmark.id, {
@@ -61,7 +65,7 @@ const loadBookmarks = async () => {
           } catch (e) {
             console.log('书架加载 - 没有阅读进度:', e)
           }
-          
+
           const chaptersResponse = await bookmarkApi.getNovelChapters(novelId)
           if (chaptersResponse.code === 200 && chaptersResponse.data) {
             const currentChapter = chaptersResponse.data.find(ch => ch.id === bookmark.chapterId)
@@ -76,7 +80,7 @@ const loadBookmarks = async () => {
           console.log('获取章节列表失败:', e)
         }
       }
-      
+
       bookmarks.value = bookmarksData
       window.scrollTo(0, 0)
     } else {
@@ -90,37 +94,41 @@ const loadBookmarks = async () => {
   }
 }
 
-const goToNovel = (novelId) => {
+const goToNovel = novelId => {
   router.push(`/novel/${novelId}`)
 }
 
-const continueReading = async (bookmark) => {
+const continueReading = async bookmark => {
   try {
     let chapterId = bookmark.chapterId
-    
+
     try {
       const novelId = bookmark.novel?.id || bookmark.novelId
       const progressResponse = await readingApi.getReadingProgress(novelId)
-      if (progressResponse.code === 200 && progressResponse.data && progressResponse.data.chapterId) {
+      if (
+        progressResponse.code === 200 &&
+        progressResponse.data &&
+        progressResponse.data.chapterId
+      ) {
         chapterId = progressResponse.data.chapterId
       }
     } catch (e) {
       console.log('获取阅读进度失败，使用书签中的 chapterId:', e)
     }
-    
+
     const novelId = bookmark.novel?.id || bookmark.novelId
     const response = await bookmarkApi.getNovelChapters(novelId)
-    
+
     if (response.code === 200 && response.data && response.data.length > 0) {
       const chapterExists = response.data.some(ch => ch.id === chapterId)
-      
+
       if (!chapterExists || !chapterId) {
         chapterId = response.data[0].id
       }
     } else {
       chapterId = 1
     }
-    
+
     router.push(`/novel/${novelId}/chapter/${chapterId}`)
   } catch (error) {
     console.error('获取章节失败:', error)
@@ -128,7 +136,7 @@ const continueReading = async (bookmark) => {
   }
 }
 
-const removeBookmark = async (bookmarkId) => {
+const removeBookmark = async bookmarkId => {
   try {
     const response = await bookmarkApi.deleteBookmark(bookmarkId)
     if (response.code === 200) {
@@ -158,22 +166,22 @@ const removeBookmark = async (bookmarkId) => {
         <p>共 {{ bookmarks.length }} 本收藏</p>
       </div>
     </div>
-    
+
     <div class="bookshelf-content">
       <div v-if="loading" class="loading-state">
         <div class="spinner"></div>
         <p>加载中...</p>
       </div>
-      
+
       <div v-else-if="bookmarks.length > 0" class="novel-grid">
-        <div 
-          v-for="bookmark in bookmarks" 
-          :key="bookmark.id" 
-          class="bookmark-card"
-        >
+        <div v-for="bookmark in bookmarks" :key="bookmark.id" class="bookmark-card">
           <div class="card-cover" @click="goToNovel(bookmark.novel.id)">
-            <img 
-              :src="bookmark.novel.coverImage ? `/api/novels/${bookmark.novel.id}/cover` : 'https://via.placeholder.com/200x280'" 
+            <img
+              :src="
+                bookmark.novel.coverImage
+                  ? `/api/novels/${bookmark.novel.id}/cover`
+                  : 'https://via.placeholder.com/200x280'
+              "
               :alt="bookmark.novel.title"
             />
             <div class="cover-overlay">
@@ -183,9 +191,11 @@ const removeBookmark = async (bookmarkId) => {
               </svg>
             </div>
           </div>
-          
+
           <div class="card-content">
-            <h3 class="novel-title" @click="goToNovel(bookmark.novel.id)">{{ bookmark.novel.title }}</h3>
+            <h3 class="novel-title" @click="goToNovel(bookmark.novel.id)">{{
+              bookmark.novel.title
+            }}</h3>
             <p class="novel-author">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
@@ -214,7 +224,7 @@ const removeBookmark = async (bookmarkId) => {
               {{ new Date(bookmark.createdAt).toLocaleDateString() }}
             </p>
           </div>
-          
+
           <div class="card-actions">
             <button class="btn-read" @click="continueReading(bookmark)">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -225,13 +235,15 @@ const removeBookmark = async (bookmarkId) => {
             <button class="btn-remove" @click="removeBookmark(bookmark.id)">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="3 6 5 6 21 6"></polyline>
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                <path
+                  d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                ></path>
               </svg>
             </button>
           </div>
         </div>
       </div>
-      
+
       <div v-else class="empty-state">
         <div class="empty-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -345,7 +357,9 @@ const removeBookmark = async (bookmarkId) => {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .loading-state p {
@@ -607,15 +621,15 @@ const removeBookmark = async (bookmarkId) => {
   .bookshelf-page {
     padding: 24px 16px;
   }
-  
+
   .bookshelf-header {
     padding: 24px;
   }
-  
+
   .header-content h1 {
     font-size: 26px;
   }
-  
+
   .novel-grid {
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     gap: 16px;
@@ -628,15 +642,15 @@ const removeBookmark = async (bookmarkId) => {
     text-align: center;
     padding: 24px;
   }
-  
+
   .header-icon {
     margin-bottom: 8px;
   }
-  
+
   .novel-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .card-cover {
     height: 180px;
   }

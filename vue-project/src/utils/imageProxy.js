@@ -11,19 +11,19 @@ const IMAGE_PROXY = '/api/proxy/image?url='
  * @param {string} url - 原始图片 URL
  * @returns {string} - 代理后的 URL
  */
-export const proxyImageUrl = (url) => {
+export const proxyImageUrl = url => {
   if (!url) return ''
-  
+
   // 如果是本地图片，直接返回
   if (!url.startsWith('http')) {
     return url
   }
-  
+
   // 如果是 Unsplash 或 Placeholder 图片，使用代理
   if (url.includes('unsplash') || url.includes('placeholder')) {
     return `${IMAGE_PROXY}${encodeURIComponent(url)}`
   }
-  
+
   // 其他外部图片也使用代理
   return `${IMAGE_PROXY}${encodeURIComponent(url)}`
 }

@@ -2,7 +2,7 @@
 /**
  * 首页视图组件
  * 展示小说推荐、轮播图和分类浏览功能
- * 
+ *
  * 优化点：
  * 1. 使用 shallowRef 优化大型数据响应式性能
  * 2. 使用 computed 缓存计算结果
@@ -10,12 +10,12 @@
  * 4. 添加错误边界处理
  */
 
-import { 
-  ref, 
-  shallowRef,  // 用于大型数据，减少响应式开销
-  onMounted, 
-  onUnmounted, 
-  computed, 
+import {
+  ref,
+  shallowRef, // 用于大型数据，减少响应式开销
+  onMounted,
+  onUnmounted,
+  computed,
   watch,
   nextTick
 } from 'vue'
@@ -66,12 +66,9 @@ const tabs = computed(() => {
     { id: 'latest', label: '热门推荐', icon: '📚' },
     { id: 'completed', label: '完结精品', icon: '✅' }
   ]
-  
+
   if (isLoggedIn.value) {
-    return [
-      { id: 'personalized', label: '个性化推荐', icon: '✨' },
-      ...baseTabs
-    ]
+    return [{ id: 'personalized', label: '个性化推荐', icon: '✨' }, ...baseTabs]
   }
   return baseTabs
 })
@@ -80,9 +77,7 @@ const tabs = computed(() => {
  * 当前显示的小说列表 - 使用 computed 避免重复计算
  */
 const displayedNovels = computed(() => {
-  return activeTab.value === 'personalized' 
-    ? personalizedNovels.value 
-    : novels.value
+  return activeTab.value === 'personalized' ? personalizedNovels.value : novels.value
 })
 
 /**
@@ -92,18 +87,18 @@ const pageNumbers = computed(() => {
   const pages = []
   const maxVisible = 5
   const halfVisible = Math.floor(maxVisible / 2)
-  
+
   let start = Math.max(0, currentPage.value - halfVisible)
-  let end = Math.min(totalPages.value, start + maxVisible)
-  
+  const end = Math.min(totalPages.value, start + maxVisible)
+
   if (end - start < maxVisible) {
     start = Math.max(0, end - maxVisible)
   }
-  
+
   for (let i = start; i < end; i++) {
     pages.push(i)
   }
-  
+
   return pages
 })
 
@@ -118,7 +113,7 @@ const showPagination = computed(() => {
 /**
  * 代理图片URL
  */
-const proxyImageUrl = (url) => {
+const proxyImageUrl = url => {
   if (!url) return 'https://picsum.photos/seed/default/800/400'
   if (!url.startsWith('http')) return url
   if (url.includes('unsplash') || url.includes('placeholder') || url.includes('picsum')) {
@@ -137,10 +132,11 @@ const nextSlide = () => {
 
 const prevSlide = () => {
   if (carouselItems.value.length === 0) return
-  currentSlide.value = (currentSlide.value - 1 + carouselItems.value.length) % carouselItems.value.length
+  currentSlide.value =
+    (currentSlide.value - 1 + carouselItems.value.length) % carouselItems.value.length
 }
 
-const goToSlide = (index) => {
+const goToSlide = index => {
   currentSlide.value = index
 }
 
@@ -164,7 +160,7 @@ const stopAutoPlay = () => {
 /**
  * 导航方法
  */
-const goToNovel = (novelId) => {
+const goToNovel = novelId => {
   router.push(`/novel/${novelId}`)
 }
 
@@ -181,7 +177,7 @@ const viewAll = () => {
 /**
  * 分页控制
  */
-const goToPage = (page) => {
+const goToPage = page => {
   if (page < 0 || page >= totalPages.value) return
   currentPage.value = page
   fetchNovels(page)
@@ -210,7 +206,7 @@ const loadCarouselNovels = async () => {
   try {
     const response = await recommendationApi.getPopularRecommendations(3)
     if (response.code === 200 && response.data) {
-      carouselItems.value = response.data.map((novel) => ({
+      carouselItems.value = response.data.map(novel => ({
         id: novel.id,
         title: novel.title,
         subtitle: `${novel.author} · ${novel.category}小说`,
@@ -225,10 +221,10 @@ const loadCarouselNovels = async () => {
     carouselItems.value = [
       {
         id: 1,
-        title: "热门精选",
-        subtitle: "平台推荐 · 精彩小说",
-        description: "这是为您精心挑选的热门小说。",
-        image: "https://picsum.photos/seed/carousel1/800/400",
+        title: '热门精选',
+        subtitle: '平台推荐 · 精彩小说',
+        description: '这是为您精心挑选的热门小说。',
+        image: 'https://picsum.photos/seed/carousel1/800/400',
         novelId: 1
       }
     ]
@@ -247,7 +243,7 @@ const fetchNovels = async (page = 0) => {
       category: activeTab.value === 'completed' ? '' : 'all',
       status: activeTab.value === 'completed' ? 'completed' : ''
     }
-    
+
     const response = await novelApi.getNovels(params)
     if (response.code === 200 && response.data) {
       let novelList = []
@@ -261,7 +257,7 @@ const fetchNovels = async (page = 0) => {
         totalElements.value = response.data.totalElements || response.data.content.length
         currentPage.value = response.data.currentPage || response.data.number || page
       }
-      
+
       // 使用 shallowRef 减少响应式开销
       novels.value = novelList.map(novel => ({
         id: novel.id,
@@ -292,10 +288,8 @@ const fetchPersonalizedRecommendations = async () => {
   try {
     const response = await recommendationApi.getPersonalizedRecommendations(DISPLAY_LIMIT)
     if (response.code === 200 && response.data) {
-      const novelList = Array.isArray(response.data) 
-        ? response.data 
-        : (response.data.content || [])
-      
+      const novelList = Array.isArray(response.data) ? response.data : response.data.content || []
+
       personalizedNovels.value = novelList.slice(0, DISPLAY_LIMIT).map(novel => ({
         id: novel.id,
         title: novel.title,
@@ -322,10 +316,8 @@ const fetchPopularRecommendations = async () => {
   try {
     const response = await recommendationApi.getBookmarkRecommendations(DISPLAY_LIMIT)
     if (response.code === 200 && response.data) {
-      const novelList = Array.isArray(response.data) 
-        ? response.data 
-        : (response.data.content || [])
-      
+      const novelList = Array.isArray(response.data) ? response.data : response.data.content || []
+
       novels.value = novelList.slice(0, DISPLAY_LIMIT).map(novel => ({
         id: novel.id,
         title: novel.title,
@@ -352,10 +344,8 @@ const fetchLatestUpdates = async () => {
   try {
     const response = await recommendationApi.getReadingHistoryRecommendations(DISPLAY_LIMIT)
     if (response.code === 200 && response.data) {
-      const novelList = Array.isArray(response.data) 
-        ? response.data 
-        : (response.data.content || [])
-      
+      const novelList = Array.isArray(response.data) ? response.data : response.data.content || []
+
       novels.value = novelList.slice(0, DISPLAY_LIMIT).map(novel => ({
         id: novel.id,
         title: novel.title,
@@ -382,10 +372,8 @@ const fetchCompletedNovels = async () => {
   try {
     const response = await recommendationApi.getCompletedRecommendations(DISPLAY_LIMIT)
     if (response.code === 200 && response.data) {
-      const novelList = Array.isArray(response.data) 
-        ? response.data 
-        : (response.data.content || [])
-      
+      const novelList = Array.isArray(response.data) ? response.data : response.data.content || []
+
       novels.value = novelList.slice(0, DISPLAY_LIMIT).map(novel => ({
         id: novel.id,
         title: novel.title,
@@ -408,7 +396,7 @@ const fetchCompletedNovels = async () => {
 /**
  * 加载标签页数据
  */
-const loadTabData = (tab) => {
+const loadTabData = tab => {
   currentPage.value = 0
   const loaders = {
     personalized: fetchPersonalizedRecommendations,
@@ -416,7 +404,7 @@ const loadTabData = (tab) => {
     latest: fetchLatestUpdates,
     completed: fetchCompletedNovels
   }
-  
+
   const loader = loaders[tab]
   if (loader) {
     loader()
@@ -427,7 +415,7 @@ const loadTabData = (tab) => {
 /**
  * 监听标签变化 - 使用 watch 优化
  */
-watch(activeTab, (newTab) => {
+watch(activeTab, newTab => {
   loadTabData(newTab)
 })
 
@@ -444,12 +432,12 @@ onMounted(() => {
       }, 300)
     })
   }, 800)
-  
+
   // 初始化
   if (!isLoggedIn.value) {
     activeTab.value = 'recommend'
   }
-  
+
   loadCarouselNovels()
   loadTabData(activeTab.value)
   startAutoPlay()
@@ -469,8 +457,20 @@ onUnmounted(() => {
       <div class="loader-content">
         <div class="loader-icon">
           <svg viewBox="0 0 100 100" class="book-svg">
-            <path class="book-path" d="M20,20 L50,10 L80,20 L80,80 L50,90 L20,80 Z" fill="none" stroke="currentColor" stroke-width="2"/>
-            <path class="book-page" d="M50,10 L50,90" fill="none" stroke="currentColor" stroke-width="1"/>
+            <path
+              class="book-path"
+              d="M20,20 L50,10 L80,20 L80,80 L50,90 L20,80 Z"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            />
+            <path
+              class="book-page"
+              d="M50,10 L50,90"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1"
+            />
           </svg>
         </div>
         <p class="loader-text">正在加载精彩内容...</p>
@@ -484,15 +484,20 @@ onUnmounted(() => {
       <div class="carousel-container" @mouseenter="stopAutoPlay" @mouseleave="startAutoPlay">
         <div class="carousel-track">
           <TransitionGroup name="carousel-fade">
-            <div 
-              v-for="(item, index) in carouselItems" 
-              :key="item.id"
+            <div
+              v-for="(item, index) in carouselItems"
               v-show="index === currentSlide"
+              :key="item.id"
               class="carousel-slide"
               @click="goToNovel(item.novelId)"
             >
               <div class="slide-image">
-                <img :src="item.image" :alt="item.title" loading="eager" @error="$event.target.src='https://picsum.photos/seed/carousel-default/800/400'" />
+                <img
+                  :src="item.image"
+                  :alt="item.title"
+                  loading="eager"
+                  @error="$event.target.src = 'https://picsum.photos/seed/carousel-default/800/400'"
+                />
                 <div class="image-overlay"></div>
               </div>
               <div class="slide-content">
@@ -502,33 +507,54 @@ onUnmounted(() => {
                 <p class="slide-description">{{ item.description }}</p>
                 <button class="slide-cta">
                   <span>开始阅读</span>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path d="M5 12h14M12 5l7 7-7 7" />
                   </svg>
                 </button>
               </div>
             </div>
           </TransitionGroup>
         </div>
-        
-        <button class="carousel-nav prev" @click.stop="prevSlide" aria-label="上一张">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M15 18l-6-6 6-6"/>
+
+        <button class="carousel-nav prev" aria-label="上一张" @click.stop="prevSlide">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M15 18l-6-6 6-6" />
           </svg>
         </button>
-        <button class="carousel-nav next" @click.stop="nextSlide" aria-label="下一张">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M9 18l6-6-6-6"/>
+        <button class="carousel-nav next" aria-label="下一张" @click.stop="nextSlide">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M9 18l6-6-6-6" />
           </svg>
         </button>
-        
+
         <div class="carousel-indicators">
-          <button 
-            v-for="(_, index) in carouselItems" 
+          <button
+            v-for="(_, index) in carouselItems"
             :key="index"
             :class="['indicator', { active: index === currentSlide }]"
-            @click.stop="goToSlide(index)"
             :aria-label="`跳转到第 ${index + 1} 张`"
+            @click.stop="goToSlide(index)"
           ></button>
         </div>
       </div>
@@ -538,39 +564,51 @@ onUnmounted(() => {
     <section class="content-section">
       <div class="section-header">
         <nav class="tab-nav" role="tablist">
-          <button 
-            v-for="tab in tabs" 
+          <button
+            v-for="tab in tabs"
             :key="tab.id"
             :class="['tab-btn', { active: activeTab === tab.id }]"
-            @click="activeTab = tab.id"
             role="tab"
             :aria-selected="activeTab === tab.id"
+            @click="activeTab = tab.id"
           >
             <span class="tab-icon">{{ tab.icon }}</span>
             <span class="tab-label">{{ tab.label }}</span>
           </button>
         </nav>
-        
+
         <button class="view-all-btn" @click="viewAll">
           <span>查看全部</span>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M5 12h14M12 5l7 7-7 7"/>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M5 12h14M12 5l7 7-7 7" />
           </svg>
         </button>
       </div>
 
       <div class="novels-container">
         <TransitionGroup name="novel-list" tag="div" class="novel-grid">
-          <NovelCard 
-            v-for="novel in displayedNovels"
-            :key="novel.id"
-            :novel="novel"
-          />
+          <NovelCard v-for="novel in displayedNovels" :key="novel.id" :novel="novel" />
         </TransitionGroup>
-        
+
         <div v-if="displayedNovels.length === 0 && !loading" class="empty-state">
-          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+          <svg
+            width="64"
+            height="64"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+          >
+            <path
+              d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+            />
           </svg>
           <p>暂无推荐小说</p>
         </div>
@@ -584,57 +622,105 @@ onUnmounted(() => {
       <!-- 分页 -->
       <nav v-if="showPagination" class="pagination" aria-label="分页导航">
         <div class="pagination-controls">
-          <button class="page-btn" @click="goToFirstPage" :disabled="currentPage === 0" aria-label="首页">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M11 17l-5-5 5-5M18 17l-5-5 5-5"/>
+          <button
+            class="page-btn"
+            :disabled="currentPage === 0"
+            aria-label="首页"
+            @click="goToFirstPage"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M11 17l-5-5 5-5M18 17l-5-5 5-5" />
             </svg>
           </button>
-          <button class="page-btn" @click="goToPrevPage" :disabled="currentPage === 0" aria-label="上一页">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M15 18l-6-6 6-6"/>
+          <button
+            class="page-btn"
+            :disabled="currentPage === 0"
+            aria-label="上一页"
+            @click="goToPrevPage"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M15 18l-6-6 6-6" />
             </svg>
           </button>
-          
+
           <div class="page-numbers">
-            <button 
-              v-for="page in pageNumbers" 
+            <button
+              v-for="page in pageNumbers"
               :key="page"
               :class="['page-num', { active: currentPage === page }]"
-              @click="goToPage(page)"
               :aria-label="`第 ${page + 1} 页`"
               :aria-current="currentPage === page ? 'page' : null"
+              @click="goToPage(page)"
             >
               {{ page + 1 }}
             </button>
           </div>
-          
-          <button class="page-btn" @click="goToNextPage" :disabled="currentPage === totalPages - 1" aria-label="下一页">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M9 18l6-6-6-6"/>
+
+          <button
+            class="page-btn"
+            :disabled="currentPage === totalPages - 1"
+            aria-label="下一页"
+            @click="goToNextPage"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M9 18l6-6-6-6" />
             </svg>
           </button>
-          <button class="page-btn" @click="goToLastPage" :disabled="currentPage === totalPages - 1" aria-label="末页">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M13 17l5-5-5-5M6 17l5-5-5-5"/>
+          <button
+            class="page-btn"
+            :disabled="currentPage === totalPages - 1"
+            aria-label="末页"
+            @click="goToLastPage"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M13 17l5-5-5-5M6 17l5-5-5-5" />
             </svg>
           </button>
         </div>
-        
+
         <div class="pagination-info">
           <span>共 {{ totalElements }} 本</span>
           <span>第 {{ currentPage + 1 }} / {{ totalPages }} 页</span>
         </div>
-        
+
         <div class="pagination-jump">
           <label for="page-jump">跳转至</label>
-          <input 
+          <input
             id="page-jump"
-            type="number" 
             v-model.number="jumpPage"
-            @keyup.enter="handleJumpPage"
+            type="number"
             :min="1"
             :max="totalPages"
             class="jump-input"
+            @keyup.enter="handleJumpPage"
           />
           <button class="jump-btn" @click="handleJumpPage">确定</button>
         </div>
@@ -687,12 +773,19 @@ onUnmounted(() => {
 }
 
 @keyframes draw {
-  to { stroke-dashoffset: 0; }
+  to {
+    stroke-dashoffset: 0;
+  }
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 .loader-text {
@@ -718,7 +811,9 @@ onUnmounted(() => {
   background: linear-gradient(180deg, #0d1117 0%, #161b22 100%);
   opacity: 0;
   transform: translateY(20px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s ease;
 }
 
 .home.content-loaded {
@@ -887,8 +982,12 @@ onUnmounted(() => {
   transform: translateY(-50%) scale(1.1);
 }
 
-.carousel-nav.prev { left: 30px; }
-.carousel-nav.next { right: 30px; }
+.carousel-nav.prev {
+  left: 30px;
+}
+.carousel-nav.next {
+  right: 30px;
+}
 
 .carousel-indicators {
   position: absolute;
@@ -1041,7 +1140,9 @@ onUnmounted(() => {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* 分页 */
@@ -1200,7 +1301,7 @@ onUnmounted(() => {
   .content-section {
     padding: 40px 40px;
   }
-  
+
   .slide-content {
     padding: 40px;
   }
@@ -1211,51 +1312,55 @@ onUnmounted(() => {
     height: 60vh;
     min-height: 400px;
   }
-  
+
   .slide-content {
     padding: 24px;
   }
-  
+
   .slide-title {
     font-size: 28px;
   }
-  
+
   .content-section {
     padding: 24px 16px;
   }
-  
+
   .section-header {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .tab-nav {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
-  
+
   .tab-btn {
     flex-shrink: 0;
     padding: 10px 16px;
   }
-  
+
   .view-all-btn {
     justify-content: center;
   }
-  
+
   .novel-grid {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 16px;
   }
-  
+
   .carousel-nav {
     width: 40px;
     height: 40px;
   }
-  
-  .carousel-nav.prev { left: 16px; }
-  .carousel-nav.next { right: 16px; }
-  
+
+  .carousel-nav.prev {
+    left: 16px;
+  }
+  .carousel-nav.next {
+    right: 16px;
+  }
+
   .carousel-indicators {
     right: 24px;
   }
