@@ -1,119 +1,69 @@
 <script setup>
+// 导入Vue相关的响应式API
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
+import { useRouter } from 'vue-router'
+// 导入小说卡片组件
+import NovelCard from '../components/NovelCard.vue'
+// 导入API模块
+import { novelApi } from '../api/modules/novel.js'
+import { recommendationApi } from '../api/modules/recommendation.js'
+// 导入Element Plus消息组件
+import { ElMessage } from 'element-plus'
+
 /**
  * 首页视图组件
  * 展示小说推荐、轮播图和分类浏览功能
- *
- * 优化点：
- * 1. 使用 shallowRef 优化大型数据响应式性能
- * 2. 使用 computed 缓存计算结果
- * 3. 优化 watch 使用，避免不必要的重新渲染
- * 4. 添加错误边界处理
  */
 
-import {
-  ref,
-  shallowRef, // 用于大型数据，减少响应式开销
-  onMounted,
-  onUnmounted,
-  computed,
-  watch,
-  nextTick
-} from 'vue'
-import { useRouter } from 'vue-router'
-import NovelCard from '../components/NovelCard.vue'
-import { novelApi } from '../api/modules/novel.js'
-import { recommendationApi } from '../api/modules/recommendation.js'
-import { ElMessage } from 'element-plus'
-
-// ==================== Constants ====================
-const DISPLAY_LIMIT = 9
-const PAGE_SIZE = 24
-const AUTO_PLAY_INTERVAL = 5000
-const IMAGE_PROXY = '/api/proxy/image?url='
-
-// ==================== Router & State ====================
-const router = useRouter()
-
-// 使用 shallowRef 优化大型数组的响应式性能
-const novels = shallowRef([])
-const personalizedNovels = shallowRef([])
-const carouselItems = shallowRef([])
-
-// 基础状态
+// 页面加载状态
 const pageLoading = ref(true)
+// 内容加载完成状态
 const contentLoaded = ref(false)
-const loading = ref(false)
-const activeTab = ref('recommend')
-const currentSlide = ref(0)
-const isLoggedIn = ref(localStorage.getItem('token') !== null)
 
-// 分页状态
+// 路由实例
+const router = useRouter()
+// 小说列表
+const novels = ref([])
+// 个性化推荐小说列表
+const personalizedNovels = ref([])
+// 加载状态
+const loading = ref(false)
+// 当前激活的标签
+const activeTab = ref('recommend')
+
+// 分页相关数据
 const currentPage = ref(0)
 const totalPages = ref(0)
 const totalElements = ref(0)
+const pageSize = ref(24)
 const jumpPage = ref(1)
 
-// 自动播放定时器（使用 ref 以便清理）
-const autoPlayInterval = ref(null)
-
-// ==================== Computed ====================
 /**
- * 标签页配置 - 使用 computed 缓存
+ * 处理页码跳转
  */
-const tabs = computed(() => {
-  const baseTabs = [
-    { id: 'recommend', label: '重磅推荐', icon: '🔥' },
-    { id: 'latest', label: '热门推荐', icon: '📚' },
-    { id: 'completed', label: '完结精品', icon: '✅' }
-  ]
-
-  if (isLoggedIn.value) {
-    return [{ id: 'personalized', label: '个性化推荐', icon: '✨' }, ...baseTabs]
+const handleJumpPage = () => {
+  if (jumpPage.value && jumpPage.value >= 1 && jumpPage.value <= totalPages.value) {
+    goToPage(jumpPage.value - 1)
+    jumpPage.value = 1
+  } else {
+    ElMessage.warning(`请输入有效的页码（1-${totalPages.value}）`)
   }
-  return baseTabs
-})
+}
 
-/**
- * 当前显示的小说列表 - 使用 computed 避免重复计算
- */
-const displayedNovels = computed(() => {
-  return activeTab.value === 'personalized' ? personalizedNovels.value : novels.value
-})
+// 登录状态
+const isLoggedIn = ref(localStorage.getItem('token') !== null)
 
-/**
- * 获取显示的页码列表 - 使用 computed 缓存
- */
-const pageNumbers = computed(() => {
-  const pages = []
-  const maxVisible = 5
-  const halfVisible = Math.floor(maxVisible / 2)
+// 轮播图数据
+const carouselItems = ref([])
+// 图片代理URL
+const IMAGE_PROXY = '/api/proxy/image?url='
 
-  let start = Math.max(0, currentPage.value - halfVisible)
-  const end = Math.min(totalPages.value, start + maxVisible)
-
-  if (end - start < maxVisible) {
-    start = Math.max(0, end - maxVisible)
-  }
-
-  for (let i = start; i < end; i++) {
-    pages.push(i)
-  }
-
-  return pages
-})
-
-/**
- * 是否显示分页 - 使用 computed
- */
-const showPagination = computed(() => {
-  return !loading.value && totalPages.value > 1 && activeTab.value !== 'personalized'
-})
-
-// ==================== Methods ====================
 /**
  * 代理图片URL
+ * @param {string} url 原始图片URL
+ * @return {string} 代理后的图片URL
  */
-const proxyImageUrl = url => {
+const proxyImageUrl = (url) => {
   if (!url) return 'https://picsum.photos/seed/default/800/400'
   if (!url.startsWith('http')) return url
   if (url.includes('unsplash') || url.includes('placeholder') || url.includes('picsum')) {
@@ -123,47 +73,123 @@ const proxyImageUrl = url => {
 }
 
 /**
- * 轮播图控制
+ * 加载轮播图小说
+ */
+const loadCarouselNovels = async () => {
+  try {
+    const response = await recommendationApi.getPopularRecommendations(3)
+    console.log('轮播图 API 响应:', response)
+    if (response.code === 200 && response.data) {
+      carouselItems.value = response.data.map((novel, index) => {
+        console.log('处理小说:', novel)
+        return ({
+          id: novel.id,
+          title: novel.title,
+          subtitle: `${novel.author} · ${novel.category}小说`,
+          description: novel.description || `这是一本精彩的${novel.category}小说。`,
+          image: `/api/novels/${novel.id}/cover`,
+          novelId: novel.id
+        })
+      })
+      console.log('轮播图数据:', carouselItems.value)
+    }
+  } catch (error) {
+    console.error('加载轮播图失败:', error)
+    carouselItems.value = [
+      {
+        id: 1,
+        title: "热门精选",
+        subtitle: "平台推荐 · 精彩小说",
+        description: "这是为您精心挑选的热门小说。",
+        image: "https://picsum.photos/seed/carousel1/800/400",
+        novelId: 1
+      }
+    ]
+  }
+}
+
+// 当前轮播图索引
+const currentSlide = ref(0)
+// 自动播放定时器
+let autoPlayInterval = null
+
+/**
+ * 下一张轮播图
  */
 const nextSlide = () => {
-  if (carouselItems.value.length === 0) return
   currentSlide.value = (currentSlide.value + 1) % carouselItems.value.length
 }
 
+/**
+ * 上一张轮播图
+ */
 const prevSlide = () => {
-  if (carouselItems.value.length === 0) return
-  currentSlide.value =
-    (currentSlide.value - 1 + carouselItems.value.length) % carouselItems.value.length
+  currentSlide.value = (currentSlide.value - 1 + carouselItems.value.length) % carouselItems.value.length
 }
 
-const goToSlide = index => {
+/**
+ * 跳转到指定轮播图
+ * @param {number} index 轮播图索引
+ */
+const goToSlide = (index) => {
   currentSlide.value = index
 }
 
 /**
- * 自动播放控制
+ * 跳转到小说详情页
+ * @param {number} novelId 小说ID
+ */
+const goToNovel = (novelId) => {
+  router.push(`/novel/${novelId}`)
+}
+
+/**
+ * 开始自动播放轮播图
  */
 const startAutoPlay = () => {
   stopAutoPlay()
   if (carouselItems.value.length > 1) {
-    autoPlayInterval.value = setInterval(nextSlide, AUTO_PLAY_INTERVAL)
-  }
-}
-
-const stopAutoPlay = () => {
-  if (autoPlayInterval.value) {
-    clearInterval(autoPlayInterval.value)
-    autoPlayInterval.value = null
+    autoPlayInterval = setInterval(() => {
+      nextSlide()
+    }, 5000)
   }
 }
 
 /**
- * 导航方法
+ * 停止自动播放轮播图
  */
-const goToNovel = novelId => {
-  router.push(`/novel/${novelId}`)
+const stopAutoPlay = () => {
+  if (autoPlayInterval) {
+    clearInterval(autoPlayInterval)
+    autoPlayInterval = null
+  }
 }
 
+/**
+ * 标签页配置
+ */
+const tabs = computed(() => {
+  if (isLoggedIn.value) {
+    return [
+      { id: 'personalized', label: '个性化推荐', icon: '✨' },
+      { id: 'recommend', label: '重磅推荐', icon: '🔥' },
+      { id: 'latest', label: '热门推荐', icon: '📚' },
+      { id: 'completed', label: '完结精品', icon: '✅' }
+    ]
+  }
+  return [
+    { id: 'recommend', label: '重磅推荐', icon: '🔥' },
+    { id: 'latest', label: '热门推荐', icon: '📚' },
+    { id: 'completed', label: '完结精品', icon: '✅' }
+  ]
+})
+
+// 显示限制
+const DISPLAY_LIMIT = 9
+
+/**
+ * 查看全部小说
+ */
 const viewAll = () => {
   const typeMap = {
     personalized: 'personalized',
@@ -175,75 +201,19 @@ const viewAll = () => {
 }
 
 /**
- * 分页控制
- */
-const goToPage = page => {
-  if (page < 0 || page >= totalPages.value) return
-  currentPage.value = page
-  fetchNovels(page)
-  window.scrollTo({ top: 0, behavior: 'smooth' })
-}
-
-const goToFirstPage = () => goToPage(0)
-const goToLastPage = () => goToPage(totalPages.value - 1)
-const goToPrevPage = () => goToPage(currentPage.value - 1)
-const goToNextPage = () => goToPage(currentPage.value + 1)
-
-const handleJumpPage = () => {
-  if (jumpPage.value >= 1 && jumpPage.value <= totalPages.value) {
-    goToPage(jumpPage.value - 1)
-    jumpPage.value = 1
-  } else {
-    ElMessage.warning(`请输入有效的页码（1-${totalPages.value}）`)
-  }
-}
-
-// ==================== Data Fetching ====================
-/**
- * 加载轮播图小说
- */
-const loadCarouselNovels = async () => {
-  try {
-    const response = await recommendationApi.getPopularRecommendations(3)
-    if (response.code === 200 && response.data) {
-      carouselItems.value = response.data.map(novel => ({
-        id: novel.id,
-        title: novel.title,
-        subtitle: `${novel.author} · ${novel.category}小说`,
-        description: novel.description || `这是一本精彩的${novel.category}小说。`,
-        image: `/api/novels/${novel.id}/cover`,
-        novelId: novel.id
-      }))
-    }
-  } catch (error) {
-    console.error('加载轮播图失败:', error)
-    // 使用默认数据
-    carouselItems.value = [
-      {
-        id: 1,
-        title: '热门精选',
-        subtitle: '平台推荐 · 精彩小说',
-        description: '这是为您精心挑选的热门小说。',
-        image: 'https://picsum.photos/seed/carousel1/800/400',
-        novelId: 1
-      }
-    ]
-  }
-}
-
-/**
- * 获取小说列表 - 带错误处理
+ * 获取小说列表
+ * @param {number} page 页码
  */
 const fetchNovels = async (page = 0) => {
   loading.value = true
   try {
     const params = {
-      page,
-      size: PAGE_SIZE,
+      page: page,
+      size: pageSize.value,
       category: activeTab.value === 'completed' ? '' : 'all',
       status: activeTab.value === 'completed' ? 'completed' : ''
     }
-
+    
     const response = await novelApi.getNovels(params)
     if (response.code === 200 && response.data) {
       let novelList = []
@@ -257,8 +227,7 @@ const fetchNovels = async (page = 0) => {
         totalElements.value = response.data.totalElements || response.data.content.length
         currentPage.value = response.data.currentPage || response.data.number || page
       }
-
-      // 使用 shallowRef 减少响应式开销
+      
       novels.value = novelList.map(novel => ({
         id: novel.id,
         title: novel.title,
@@ -269,13 +238,12 @@ const fetchNovels = async (page = 0) => {
         status: novel.status,
         views: novel.views || 0,
         bookmarks: novel.bookmarks || 0,
-        totalLikes: novel.totalLikes || 0,
-        createdAt: novel.createdAt || new Date().toISOString()
+        createdAt: novel.createdAt || novel.created_at || new Date().toISOString()
       }))
+      generateRankingList()
     }
   } catch (error) {
     console.error('获取小说列表失败:', error)
-    ElMessage.error('获取小说列表失败，请稍后重试')
   } finally {
     loading.value = false
   }
@@ -286,10 +254,11 @@ const fetchNovels = async (page = 0) => {
  */
 const fetchPersonalizedRecommendations = async () => {
   try {
-    const response = await recommendationApi.getPersonalizedRecommendations(DISPLAY_LIMIT)
+    const response = await recommendationApi.getPersonalizedRecommendations(9)
     if (response.code === 200 && response.data) {
-      const novelList = Array.isArray(response.data) ? response.data : response.data.content || []
-
+      let novelList = Array.isArray(response.data) ? response.data : 
+                     (response.data.content || [])
+      
       personalizedNovels.value = novelList.slice(0, DISPLAY_LIMIT).map(novel => ({
         id: novel.id,
         title: novel.title,
@@ -297,10 +266,7 @@ const fetchPersonalizedRecommendations = async () => {
         description: novel.description,
         cover: novel.coverImage || 'https://via.placeholder.com/150x200',
         category: novel.category,
-        status: novel.status,
-        views: novel.views || 0,
-        bookmarks: novel.bookmarks || 0,
-        totalLikes: novel.totalLikes || 0
+        status: novel.status
       }))
     }
   } catch (error) {
@@ -314,10 +280,11 @@ const fetchPersonalizedRecommendations = async () => {
  */
 const fetchPopularRecommendations = async () => {
   try {
-    const response = await recommendationApi.getBookmarkRecommendations(DISPLAY_LIMIT)
+    const response = await recommendationApi.getBookmarkRecommendations(9)
     if (response.code === 200 && response.data) {
-      const novelList = Array.isArray(response.data) ? response.data : response.data.content || []
-
+      let novelList = Array.isArray(response.data) ? response.data : 
+                     (response.data.content || [])
+      
       novels.value = novelList.slice(0, DISPLAY_LIMIT).map(novel => ({
         id: novel.id,
         title: novel.title,
@@ -327,8 +294,7 @@ const fetchPopularRecommendations = async () => {
         category: novel.category,
         status: novel.status,
         views: novel.views || 0,
-        bookmarks: novel.bookmarks || 0,
-        totalLikes: novel.totalLikes || 0
+        bookmarks: novel.bookmarks || 0
       }))
     }
   } catch (error) {
@@ -342,10 +308,11 @@ const fetchPopularRecommendations = async () => {
  */
 const fetchLatestUpdates = async () => {
   try {
-    const response = await recommendationApi.getReadingHistoryRecommendations(DISPLAY_LIMIT)
+    const response = await recommendationApi.getReadingHistoryRecommendations(9)
     if (response.code === 200 && response.data) {
-      const novelList = Array.isArray(response.data) ? response.data : response.data.content || []
-
+      let novelList = Array.isArray(response.data) ? response.data : 
+                     (response.data.content || [])
+      
       novels.value = novelList.slice(0, DISPLAY_LIMIT).map(novel => ({
         id: novel.id,
         title: novel.title,
@@ -355,8 +322,7 @@ const fetchLatestUpdates = async () => {
         category: novel.category,
         status: novel.status,
         views: novel.views || 0,
-        bookmarks: novel.bookmarks || 0,
-        totalLikes: novel.totalLikes || 0
+        bookmarks: novel.bookmarks || 0
       }))
     }
   } catch (error) {
@@ -370,10 +336,11 @@ const fetchLatestUpdates = async () => {
  */
 const fetchCompletedNovels = async () => {
   try {
-    const response = await recommendationApi.getCompletedRecommendations(DISPLAY_LIMIT)
+    const response = await recommendationApi.getCompletedRecommendations(9)
     if (response.code === 200 && response.data) {
-      const novelList = Array.isArray(response.data) ? response.data : response.data.content || []
-
+      let novelList = Array.isArray(response.data) ? response.data : 
+                     (response.data.content || [])
+      
       novels.value = novelList.slice(0, DISPLAY_LIMIT).map(novel => ({
         id: novel.id,
         title: novel.title,
@@ -383,8 +350,7 @@ const fetchCompletedNovels = async () => {
         category: novel.category,
         status: novel.status,
         views: novel.views || 0,
-        bookmarks: novel.bookmarks || 0,
-        totalLikes: novel.totalLikes || 0
+        bookmarks: novel.bookmarks || 0
       }))
     }
   } catch (error) {
@@ -393,62 +359,116 @@ const fetchCompletedNovels = async () => {
   }
 }
 
-/**
- * 加载标签页数据
- */
-const loadTabData = tab => {
-  currentPage.value = 0
-  const loaders = {
-    personalized: fetchPersonalizedRecommendations,
-    recommend: fetchPopularRecommendations,
-    latest: fetchLatestUpdates,
-    completed: fetchCompletedNovels
-  }
-
-  const loader = loaders[tab]
-  if (loader) {
-    loader()
-  }
-}
-
-// ==================== Lifecycle ====================
-/**
- * 监听标签变化 - 使用 watch 优化
- */
-watch(activeTab, newTab => {
-  loadTabData(newTab)
-})
-
-/**
- * 组件挂载
- */
+// 组件挂载时的初始化
 onMounted(() => {
-  // 页面加载动画
   setTimeout(() => {
     pageLoading.value = false
-    nextTick(() => {
-      setTimeout(() => {
-        contentLoaded.value = true
-      }, 300)
-    })
+    setTimeout(() => {
+      contentLoaded.value = true
+    }, 300)
   }, 800)
-
-  // 初始化
+  
   if (!isLoggedIn.value) {
     activeTab.value = 'recommend'
   }
-
+  
   loadCarouselNovels()
   loadTabData(activeTab.value)
   startAutoPlay()
 })
 
 /**
- * 组件卸载 - 清理资源
+ * 加载标签页数据
+ * @param {string} tab 标签ID
  */
+const loadTabData = (tab) => {
+  currentPage.value = 0
+  if (tab === 'personalized') {
+    fetchPersonalizedRecommendations()
+  } else if (tab === 'recommend') {
+    fetchPopularRecommendations()
+  } else if (tab === 'latest') {
+    fetchLatestUpdates()
+  } else if (tab === 'completed') {
+    fetchCompletedNovels()
+  }
+}
+
+// 监听标签变化，加载对应数据
+watch(activeTab, (newTab) => {
+  loadTabData(newTab)
+})
+
+/**
+ * 跳转到指定页码
+ * @param {number} page 页码
+ */
+const goToPage = (page) => {
+  if (page < 0 || page >= totalPages.value) return
+  currentPage.value = page
+  fetchNovels(page)
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+/**
+ * 跳转到首页
+ */
+const goToFirstPage = () => {
+  goToPage(0)
+}
+
+/**
+ * 跳转到末页
+ */
+const goToLastPage = () => {
+  goToPage(totalPages.value - 1)
+}
+
+/**
+ * 跳转到上一页
+ */
+const goToPrevPage = () => {
+  goToPage(currentPage.value - 1)
+}
+
+/**
+ * 跳转到下一页
+ */
+const goToNextPage = () => {
+  goToPage(currentPage.value + 1)
+}
+
+/**
+ * 获取显示的页码列表
+ */
+const getPageNumbers = computed(() => {
+  const pages = []
+  const maxVisible = 5
+  let start = Math.max(0, currentPage.value - Math.floor(maxVisible / 2))
+  let end = Math.min(totalPages.value, start + maxVisible)
+  
+  if (end - start < maxVisible) {
+    start = Math.max(0, end - maxVisible)
+  }
+  
+  for (let i = start; i < end; i++) {
+    pages.push(i)
+  }
+  
+  return pages
+})
+
+// 组件卸载时清理
 onUnmounted(() => {
   stopAutoPlay()
 })
+
+/**
+ * 生成排行榜列表
+ */
+const generateRankingList = () => {
+  // 这里可以添加生成排行榜的逻辑
+}
 </script>
 
 <template>
@@ -457,20 +477,8 @@ onUnmounted(() => {
       <div class="loader-content">
         <div class="loader-icon">
           <svg viewBox="0 0 100 100" class="book-svg">
-            <path
-              class="book-path"
-              d="M20,20 L50,10 L80,20 L80,80 L50,90 L20,80 Z"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            />
-            <path
-              class="book-page"
-              d="M50,10 L50,90"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1"
-            />
+            <path class="book-path" d="M20,20 L50,10 L80,20 L80,80 L50,90 L20,80 Z" fill="none" stroke="currentColor" stroke-width="2"/>
+            <path class="book-page" d="M50,10 L50,90" fill="none" stroke="currentColor" stroke-width="1"/>
           </svg>
         </div>
         <p class="loader-text">正在加载精彩内容...</p>
@@ -479,25 +487,19 @@ onUnmounted(() => {
   </Transition>
 
   <div v-show="!pageLoading" class="home" :class="{ 'content-loaded': contentLoaded }">
-    <!-- 轮播图区域 -->
     <section class="hero-section">
       <div class="carousel-container" @mouseenter="stopAutoPlay" @mouseleave="startAutoPlay">
         <div class="carousel-track">
           <TransitionGroup name="carousel-fade">
-            <div
-              v-for="(item, index) in carouselItems"
-              v-show="index === currentSlide"
+            <div 
+              v-for="(item, index) in carouselItems" 
               :key="item.id"
+              v-show="index === currentSlide"
               class="carousel-slide"
               @click="goToNovel(item.novelId)"
             >
               <div class="slide-image">
-                <img
-                  :src="item.image"
-                  :alt="item.title"
-                  loading="eager"
-                  @error="$event.target.src = 'https://picsum.photos/seed/carousel-default/800/400'"
-                />
+                <img :src="item.image" :alt="item.title" @error="$event.target.src='https://picsum.photos/seed/carousel-default/800/400'" />
                 <div class="image-overlay"></div>
               </div>
               <div class="slide-content">
@@ -507,108 +509,74 @@ onUnmounted(() => {
                 <p class="slide-description">{{ item.description }}</p>
                 <button class="slide-cta">
                   <span>开始阅读</span>
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                  >
-                    <path d="M5 12h14M12 5l7 7-7 7" />
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
                   </svg>
                 </button>
               </div>
             </div>
           </TransitionGroup>
         </div>
-
-        <button class="carousel-nav prev" aria-label="上一张" @click.stop="prevSlide">
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path d="M15 18l-6-6 6-6" />
+        
+        <button class="carousel-nav prev" @click.stop="prevSlide" aria-label="上一张">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 18l-6-6 6-6"/>
           </svg>
         </button>
-        <button class="carousel-nav next" aria-label="下一张" @click.stop="nextSlide">
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path d="M9 18l6-6-6-6" />
+        <button class="carousel-nav next" @click.stop="nextSlide" aria-label="下一张">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 18l6-6-6-6"/>
           </svg>
         </button>
-
+        
         <div class="carousel-indicators">
-          <button
-            v-for="(_, index) in carouselItems"
+          <button 
+            v-for="(_, index) in carouselItems" 
             :key="index"
             :class="['indicator', { active: index === currentSlide }]"
-            :aria-label="`跳转到第 ${index + 1} 张`"
             @click.stop="goToSlide(index)"
+            :aria-label="`跳转到第 ${index + 1} 张`"
           ></button>
         </div>
       </div>
     </section>
 
-    <!-- 内容区域 -->
     <section class="content-section">
       <div class="section-header">
         <nav class="tab-nav" role="tablist">
-          <button
-            v-for="tab in tabs"
+          <button 
+            v-for="tab in tabs" 
             :key="tab.id"
             :class="['tab-btn', { active: activeTab === tab.id }]"
+            @click="activeTab = tab.id"
             role="tab"
             :aria-selected="activeTab === tab.id"
-            @click="activeTab = tab.id"
           >
             <span class="tab-icon">{{ tab.icon }}</span>
             <span class="tab-label">{{ tab.label }}</span>
           </button>
         </nav>
-
+        
         <button class="view-all-btn" @click="viewAll">
           <span>查看全部</span>
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path d="M5 12h14M12 5l7 7-7 7" />
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
           </svg>
         </button>
       </div>
 
       <div class="novels-container">
         <TransitionGroup name="novel-list" tag="div" class="novel-grid">
-          <NovelCard v-for="novel in displayedNovels" :key="novel.id" :novel="novel" />
+          <NovelCard 
+            v-for="novel in (activeTab === 'personalized' ? personalizedNovels : novels)"
+            :key="novel.id"
+            :novel="novel"
+          />
         </TransitionGroup>
-
-        <div v-if="displayedNovels.length === 0 && !loading" class="empty-state">
-          <svg
-            width="64"
-            height="64"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.5"
-          >
-            <path
-              d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-            />
+        
+        <div v-if="(activeTab === 'personalized' ? personalizedNovels : novels).length === 0 && !loading" class="empty-state">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
           </svg>
           <p>暂无推荐小说</p>
         </div>
@@ -619,108 +587,59 @@ onUnmounted(() => {
         </div>
       </div>
 
-      <!-- 分页 -->
-      <nav v-if="showPagination" class="pagination" aria-label="分页导航">
+      <nav v-if="!loading && totalPages > 1 && activeTab !== 'personalized'" class="pagination" aria-label="分页导航">
         <div class="pagination-controls">
-          <button
-            class="page-btn"
-            :disabled="currentPage === 0"
-            aria-label="首页"
-            @click="goToFirstPage"
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path d="M11 17l-5-5 5-5M18 17l-5-5 5-5" />
+          <button class="page-btn" @click="goToFirstPage" :disabled="currentPage === 0" aria-label="首页">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 17l-5-5 5-5M18 17l-5-5 5-5"/>
             </svg>
           </button>
-          <button
-            class="page-btn"
-            :disabled="currentPage === 0"
-            aria-label="上一页"
-            @click="goToPrevPage"
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path d="M15 18l-6-6 6-6" />
+          <button class="page-btn" @click="goToPrevPage" :disabled="currentPage === 0" aria-label="上一页">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M15 18l-6-6 6-6"/>
             </svg>
           </button>
-
+          
           <div class="page-numbers">
-            <button
-              v-for="page in pageNumbers"
+            <button 
+              v-for="page in getPageNumbers" 
               :key="page"
               :class="['page-num', { active: currentPage === page }]"
+              @click="goToPage(page)"
               :aria-label="`第 ${page + 1} 页`"
               :aria-current="currentPage === page ? 'page' : null"
-              @click="goToPage(page)"
             >
               {{ page + 1 }}
             </button>
           </div>
-
-          <button
-            class="page-btn"
-            :disabled="currentPage === totalPages - 1"
-            aria-label="下一页"
-            @click="goToNextPage"
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path d="M9 18l6-6-6-6" />
+          
+          <button class="page-btn" @click="goToNextPage" :disabled="currentPage === totalPages - 1" aria-label="下一页">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 18l6-6-6-6"/>
             </svg>
           </button>
-          <button
-            class="page-btn"
-            :disabled="currentPage === totalPages - 1"
-            aria-label="末页"
-            @click="goToLastPage"
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path d="M13 17l5-5-5-5M6 17l5-5-5-5" />
+          <button class="page-btn" @click="goToLastPage" :disabled="currentPage === totalPages - 1" aria-label="末页">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M13 17l5-5-5-5M6 17l5-5-5-5"/>
             </svg>
           </button>
         </div>
-
+        
         <div class="pagination-info">
           <span>共 {{ totalElements }} 本</span>
           <span>第 {{ currentPage + 1 }} / {{ totalPages }} 页</span>
         </div>
-
+        
         <div class="pagination-jump">
           <label for="page-jump">跳转至</label>
-          <input
+          <input 
             id="page-jump"
+            type="number" 
             v-model.number="jumpPage"
-            type="number"
+            @keyup.enter="handleJumpPage"
             :min="1"
             :max="totalPages"
             class="jump-input"
-            @keyup.enter="handleJumpPage"
           />
           <button class="jump-btn" @click="handleJumpPage">确定</button>
         </div>
@@ -732,7 +651,6 @@ onUnmounted(() => {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;500;600;700&display=swap');
 
-/* 页面加载动画 */
 .page-loader {
   position: fixed;
   inset: 0;
@@ -773,19 +691,12 @@ onUnmounted(() => {
 }
 
 @keyframes draw {
-  to {
-    stroke-dashoffset: 0;
-  }
+  to { stroke-dashoffset: 0; }
 }
 
 @keyframes float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
 }
 
 .loader-text {
@@ -805,15 +716,12 @@ onUnmounted(() => {
   opacity: 0;
 }
 
-/* 主页样式 */
 .home {
   min-height: 100vh;
   background: linear-gradient(180deg, #0d1117 0%, #161b22 100%);
   opacity: 0;
   transform: translateY(20px);
-  transition:
-    opacity 0.6s ease,
-    transform 0.6s ease;
+  transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
 .home.content-loaded {
@@ -821,7 +729,6 @@ onUnmounted(() => {
   transform: translateY(0);
 }
 
-/* 轮播图样式 */
 .hero-section {
   position: relative;
   padding: 0;
@@ -982,12 +889,8 @@ onUnmounted(() => {
   transform: translateY(-50%) scale(1.1);
 }
 
-.carousel-nav.prev {
-  left: 30px;
-}
-.carousel-nav.next {
-  right: 30px;
-}
+.carousel-nav.prev { left: 30px; }
+.carousel-nav.next { right: 30px; }
 
 .carousel-indicators {
   position: absolute;
@@ -1013,7 +916,6 @@ onUnmounted(() => {
   width: 60px;
 }
 
-/* 内容区域 */
 .content-section {
   padding: 60px 80px;
 }
@@ -1140,12 +1042,9 @@ onUnmounted(() => {
 }
 
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  to { transform: rotate(360deg); }
 }
 
-/* 分页 */
 .pagination {
   display: flex;
   flex-direction: column;
@@ -1285,7 +1184,6 @@ onUnmounted(() => {
   box-shadow: 0 4px 12px rgba(201, 169, 98, 0.3);
 }
 
-/* 轮播图过渡 */
 .carousel-fade-enter-active,
 .carousel-fade-leave-active {
   transition: opacity 0.8s ease;
@@ -1296,12 +1194,11 @@ onUnmounted(() => {
   opacity: 0;
 }
 
-/* 响应式 */
 @media (max-width: 1024px) {
   .content-section {
     padding: 40px 40px;
   }
-
+  
   .slide-content {
     padding: 40px;
   }
@@ -1312,55 +1209,51 @@ onUnmounted(() => {
     height: 60vh;
     min-height: 400px;
   }
-
+  
   .slide-content {
     padding: 24px;
   }
-
+  
   .slide-title {
     font-size: 28px;
   }
-
+  
   .content-section {
     padding: 24px 16px;
   }
-
+  
   .section-header {
     flex-direction: column;
     align-items: stretch;
   }
-
+  
   .tab-nav {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
-
+  
   .tab-btn {
     flex-shrink: 0;
     padding: 10px 16px;
   }
-
+  
   .view-all-btn {
     justify-content: center;
   }
-
+  
   .novel-grid {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 16px;
   }
-
+  
   .carousel-nav {
     width: 40px;
     height: 40px;
   }
-
-  .carousel-nav.prev {
-    left: 16px;
-  }
-  .carousel-nav.next {
-    right: 16px;
-  }
-
+  
+  .carousel-nav.prev { left: 16px; }
+  .carousel-nav.next { right: 16px; }
+  
   .carousel-indicators {
     right: 24px;
   }
