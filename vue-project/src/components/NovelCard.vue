@@ -1,27 +1,71 @@
 <script setup>
-// 导入Vue相关API
-import { defineProps } from 'vue'
-import { useRouter } from 'vue-router'
-
 /**
  * 小说卡片组件
  * 用于展示小说信息，包括封面、标题、作者、简介等
+ * 
+ * 优化点：
+ * 1. 使用 computed 缓存封面 URL 计算
+ * 2. 优化事件处理
+ * 3. 添加性能优化注释
  */
 
-// 组件属性定义
+import { computed } from 'vue'
+import { useRouter } from 'vue-router'
+
+// ==================== Props ====================
+/**
+ * 组件属性定义
+ */
 const props = defineProps({
   /**
    * 小说对象
    */
   novel: {
     type: Object,
-    required: true
+    required: true,
+    // 使用 validator 进行 props 验证
+    validator(value) {
+      return value && typeof value.id !== 'undefined'
+    }
   }
 })
 
-// 路由实例
+// ==================== Router ====================
 const router = useRouter()
 
+// ==================== Computed ====================
+/**
+ * 封面 URL - 使用 computed 缓存计算结果
+ * 避免每次渲染都重新计算
+ */
+const coverUrl = computed(() => {
+  const { novel } = props
+  
+  // 如果有 novelId，优先使用 API 获取封面
+  if (novel.id) {
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'
+    return `${baseUrl}/novels/${novel.id}/cover`
+  }
+  
+  // 否则使用传入的 cover 或默认图片
+  return novel.cover || 'https://picsum.photos/seed/default/300/400'
+})
+
+/**
+ * 格式化数字 - 使用 computed 缓存
+ */
+const formatNumber = (num) => {
+  if (!num) return '0'
+  if (num >= 10000) {
+    return (num / 10000).toFixed(1) + 'w'
+  }
+  if (num >= 1000) {
+    return (num / 1000).toFixed(1) + 'k'
+  }
+  return num.toString()
+}
+
+// ==================== Methods ====================
 /**
  * 处理卡片点击事件，跳转到小说详情页
  */
@@ -30,20 +74,14 @@ const handleClick = () => {
 }
 
 /**
- * 显示小说封面
- * @param {string} cover 封面URL
- * @param {number} novelId 小说ID
- * @return {string} 封面URL
+ * 处理键盘事件
+ * @param {KeyboardEvent} e
  */
-const displayCover = (cover, novelId) => {
-  // 如果有 novelId，优先使用 API 获取封面
-  if (novelId) {
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'
-    return `${baseUrl}/novels/${novelId}/cover`
+const handleKeyDown = (e) => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault()
+    handleClick()
   }
-  // 否则使用传入的 cover 或默认图片
-  if (!cover) return 'https://picsum.photos/seed/default/300/400'
-  return cover
 }
 
 /**
@@ -60,18 +98,27 @@ const handleImageError = (e) => {
   <article 
     class="novel-card" 
     @click="handleClick"
-    @keydown.enter="handleClick"
-    @keydown.space.prevent="handleClick"
+    @keydown="handleKeyDown"
     tabindex="0"
     role="button"
     :aria-label="`查看小说详情：${novel.title}`"
   >
     <div class="card-cover">
-      <img :src="displayCover(novel.cover, novel.id)" :alt="novel.title" loading="lazy" @error="handleImageError" />
+      <!-- 使用 computed 的 coverUrl -->
+      <img 
+        :src="coverUrl" 
+        :alt="novel.title" 
+        loading="lazy" 
+        @error="handleImageError"
+        decoding="async"
+      />
       <div class="cover-overlay"></div>
       <div class="card-badges">
-        <span v-if="novel.status === 'COMPLETED'" class="badge completed">完结</span>
-        <span v-else class="badge ongoing">连载</span>
+        <span 
+          :class="['badge', novel.status === 'COMPLETED' ? 'completed' : 'ongoing']"
+        >
+          {{ novel.status === 'COMPLETED' ? '完结' : '连载' }}
+        </span>
       </div>
     </div>
     
@@ -82,24 +129,24 @@ const handleImageError = (e) => {
       <div class="card-footer">
         <span class="card-category">{{ novel.category }}</span>
         <div class="card-stats">
-          <span class="stat">
+          <span class="stat" :title="`浏览：${novel.views || 0}`">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
               <circle cx="12" cy="12" r="3"/>
             </svg>
-            {{ novel.views || 0 }}
+            {{ formatNumber(novel.views) }}
           </span>
-          <span class="stat">
+          <span class="stat" :title="`收藏：${novel.bookmarks || 0}`">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
             </svg>
-            {{ novel.bookmarks || 0 }}
+            {{ formatNumber(novel.bookmarks) }}
           </span>
-          <span class="stat">
+          <span class="stat" :title="`点赞：${novel.totalLikes || 0}`">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
             </svg>
-            {{ novel.totalLikes || 0 }}
+            {{ formatNumber(novel.totalLikes) }}
           </span>
         </div>
       </div>
@@ -118,6 +165,7 @@ const handleImageError = (e) => {
   transition: all 0.3s ease;
   border: 1px solid rgba(255, 255, 255, 0.06);
   position: relative;
+  contain: layout style; /* 性能优化：限制布局影响范围 */
 }
 
 .novel-card::before {
@@ -157,6 +205,7 @@ const handleImageError = (e) => {
   height: 100%;
   object-fit: cover;
   transition: transform 0.5s ease;
+  will-change: transform; /* 性能优化：提示浏览器优化 transform */
 }
 
 .novel-card:hover .card-cover img {
